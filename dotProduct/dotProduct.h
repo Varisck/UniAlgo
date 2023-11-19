@@ -3,7 +3,7 @@
 
 #include <immintrin.h>
 #include <cassert>
-
+#include <iostream>
 namespace unialgo
 {
 
@@ -34,6 +34,20 @@ namespace unialgo
         return _mm512_reduce_add_ps(a);
     }
 
+    inline double horizontal_add_pd(__m256d a)
+    {
+        // Horizontally add adjacent pairs of dp
+        // sum[0] = sum[1] = a[0] + a[1]
+        // sum[2] = sum[3] = a[2] + a[3]
+        __m256d sum = _mm256_hadd_pd(a, a);
+        // extract sum[2] and sum[3]
+        __m128d sum_high128d = _mm256_extractf128_pd(sum, 1);
+        // extract sum[0] and sum[1]
+        __m128d sum_low128d = _mm256_castpd256_pd128(sum);
+        __m128d res = _mm_add_pd(sum_high128d, sum_low128d);
+        return _mm_cvtsd_f64(res);
+    }
+
     // computes dot product between p1 and p2
     // result might be different from non-vectorized way because of float arithmetic
     // it is expected that p1 and p2 are aligned allocated with type and both vectors are same length
@@ -50,8 +64,8 @@ namespace unialgo
 
         for (int i = 0; i < num_counters; ++i)
         {
-            a = _mm256_load_ps(p1 + 8 * i);
-            b = _mm256_load_ps(p2 + 8 * i);
+            a = _mm256_load_ps(p1 + num_float * i);
+            b = _mm256_load_ps(p2 + num_float * i);
             c[i] = _mm256_mul_ps(a, b);
         }
         p1 += increment_evry_loop;
@@ -61,8 +75,8 @@ namespace unialgo
         {
             for (int i = 0; i < num_counters; ++i)
             {
-                a = _mm256_load_ps(p1 + 8 * i);
-                b = _mm256_load_ps(p2 + 8 * i);
+                a = _mm256_load_ps(p1 + num_float * i);
+                b = _mm256_load_ps(p2 + num_float * i);
                 c[i] = _mm256_fmadd_ps(a, b, c[i]);
             }
         }
@@ -73,6 +87,54 @@ namespace unialgo
         }
         float partial = horizontal_add_ps(c[0]);
         float rest = 0.0f;
+        if (size_p % increment_evry_loop != 0)
+        {
+            for (; p1 < real_p1_end; ++p1, ++p2)
+            {
+                rest += (*p1) * (*p2);
+            }
+        }
+        return partial + rest;
+    }
+
+    // computes dot product between p1 and p2
+    // result might be different from non-vectorized way because of float arithmetic
+    // it is expected that p1 and p2 are aligned allocated with type and both vectors are same length
+    inline double DotProduct(double *p1, double *p2, size_t size_p)
+    {
+        constexpr int num_double = 4;                                              // number of floats in __m256
+        constexpr int num_counters = 4;                                            // number of counters to use for dot product
+        constexpr int increment_evry_loop = num_counters * num_double;             // number of values to move pointer forword
+        const double *const p1_end = p1 + size_p - (size_p % increment_evry_loop); // end of vectorizable part of p1
+        const double *const real_p1_end = p1 + size_p;                             // end of p1
+
+        __m256d c[num_counters];
+        __m256d a, b;
+
+        for (int i = 0; i < num_counters; ++i)
+        {
+            a = _mm256_load_pd(p1 + num_double * i);
+            b = _mm256_load_pd(p2 + num_double * i);
+            c[i] = _mm256_mul_pd(a, b);
+        }
+        p1 += increment_evry_loop;
+        p2 += increment_evry_loop;
+
+        for (; p1 < p1_end; p1 += increment_evry_loop, p2 += increment_evry_loop)
+        {
+            for (int i = 0; i < num_counters; ++i)
+            {
+                a = _mm256_load_pd(p1 + num_double * i);
+                b = _mm256_load_pd(p2 + num_double * i);
+                c[i] = _mm256_fmadd_pd(a, b, c[i]);
+            }
+        }
+        for (int i = 1; i < num_counters; ++i)
+        {
+            c[0] = _mm256_add_pd(c[0], c[i]);
+        }
+        double partial = horizontal_add_pd(c[0]);
+        double rest = 0.0;
         if (size_p % increment_evry_loop != 0)
         {
             for (; p1 < real_p1_end; ++p1, ++p2)
