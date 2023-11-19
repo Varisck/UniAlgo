@@ -37,13 +37,14 @@ namespace unialgo
     // computes dot product between p1 and p2
     // result might be different from non-vectorized way because of float arithmetic
     // it is expected that p1 and p2 are aligned allocated with type and both vectors are same length
-    inline float dotProduct(float *p1, float *p2, size_t size_p)
+    inline float DotProduct(float *p1, float *p2, size_t size_p)
     {
-        constexpr int num_float = 8;                                  // number of floats in __m256
-        constexpr int num_counters = 4;                               // number of counters to use for dot product
-        constexpr int increment_evry_loop = num_counters * num_float; // number of values to move pointer forword
-        assert(size_p % increment_evry_loop == 0);
-        const float *const p1_end = p1 + size_p;
+        constexpr int num_float = 8;                                              // number of floats in __m256
+        constexpr int num_counters = 4;                                           // number of counters to use for dot product
+        constexpr int increment_evry_loop = num_counters * num_float;             // number of values to move pointer forword
+        const float *const p1_end = p1 + size_p - (size_p % increment_evry_loop); // end of vectorizable part of p1
+        const float *const real_p1_end = p1 + size_p;                             // end of p1
+
         __m256 c[num_counters];
         __m256 a, b;
 
@@ -70,7 +71,16 @@ namespace unialgo
         {
             c[0] = _mm256_add_ps(c[0], c[i]);
         }
-        return horizontal_add_ps(c[0]);
+        float partial = horizontal_add_ps(c[0]);
+        float rest = 0.0f;
+        if (size_p % increment_evry_loop != 0)
+        {
+            for (; p1 < real_p1_end; ++p1, ++p2)
+            {
+                rest += (*p1) * (*p2);
+            }
+        }
+        return partial + rest;
     }
 
 } // end namespace unialgo
