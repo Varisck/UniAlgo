@@ -4,6 +4,7 @@
 #include <immintrin.h>
 #include <cassert>
 #include <iostream>
+
 namespace unialgo
 {
 
@@ -34,6 +35,7 @@ namespace unialgo
         return _mm512_reduce_add_ps(a);
     }
 
+    // returns the sum of all 4pd values in a
     inline double horizontal_add_pd(__m256d a)
     {
         // Horizontally add adjacent pairs of dp
@@ -50,11 +52,11 @@ namespace unialgo
 
     // computes dot product between p1 and p2
     // result might be different from non-vectorized way because of float arithmetic
-    // it is expected that p1 and p2 are aligned allocated with type and both vectors are same length
+    // it is expected that p1 and p2 are aligned allocated with type, and that the 2 vectors have the same length
     inline float DotProduct(float *p1, float *p2, size_t size_p)
     {
         constexpr int num_float = 8;                                              // number of floats in __m256
-        constexpr int num_counters = 4;                                           // number of counters to use for dot product
+        constexpr int num_counters = 4;                                           // number of counters to use to compute dot product
         constexpr int increment_evry_loop = num_counters * num_float;             // number of values to move pointer forword
         const float *const p1_end = p1 + size_p - (size_p % increment_evry_loop); // end of vectorizable part of p1
         const float *const real_p1_end = p1 + size_p;                             // end of p1
@@ -99,11 +101,11 @@ namespace unialgo
 
     // computes dot product between p1 and p2
     // result might be different from non-vectorized way because of float arithmetic
-    // it is expected that p1 and p2 are aligned allocated with type and both vectors are same length
+    // it is expected that p1 and p2 are aligned allocated with type, and that the 2 vectors have the same length
     inline double DotProduct(double *p1, double *p2, size_t size_p)
     {
-        constexpr int num_double = 4;                                              // number of floats in __m256
-        constexpr int num_counters = 4;                                            // number of counters to use for dot product
+        constexpr int num_double = 4;                                              // number of doubles in __m256
+        constexpr int num_counters = 4;                                            // number of counters to use to compute dot product
         constexpr int increment_evry_loop = num_counters * num_double;             // number of values to move pointer forword
         const double *const p1_end = p1 + size_p - (size_p % increment_evry_loop); // end of vectorizable part of p1
         const double *const real_p1_end = p1 + size_p;                             // end of p1
@@ -147,4 +149,4 @@ namespace unialgo
 
 } // end namespace unialgo
 
-#endif
+#endif // UNIALGO_DOTPROD_
