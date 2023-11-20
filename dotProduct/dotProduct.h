@@ -3,12 +3,23 @@
 
 #include <immintrin.h>
 #include <cassert>
-#include <iostream>
+
+/**
+ *    \file dotProduct.h
+ *    \brief Header file implementing dot product using simd
+ *
+ *    Implementation of dot product for floats and doubles, implemented using avx.
+ **/
 
 namespace unialgo
 {
 
-    // returns the sum of all 4ps values in a
+    /**
+     * @brief Implementation of horizontal sum of __m128 register
+     *
+     * @param a
+     * @return Returns the sum of all 4 precision single values in a
+     */
     inline float horizontal_add_ps(__m128 a)
     {
         // add the 4ps in a and place them in the lowest 2 of low2
@@ -19,7 +30,12 @@ namespace unialgo
         return _mm_cvtss_f32(lowestRes);
     }
 
-    // returns the sum of all 8ps values in a
+    /**
+     * @brief Implementation of horizontal sum of __m256 register
+     *
+     * @param a
+     * @return Returns the sum of all 8ps values in a
+     */
     inline float horizontal_add_ps(__m256 a)
     {
         // divide 256ps register in 2 128ps registers
@@ -35,7 +51,12 @@ namespace unialgo
         return _mm512_reduce_add_ps(a);
     }
 
-    // returns the sum of all 4pd values in a
+    /**
+     * @brief Implementation of horizontal sum of __m256d register
+     *
+     * @param a
+     * @return Returns the sum of all 4pd values in a
+     */
     inline double horizontal_add_pd(__m256d a)
     {
         // Horizontally add adjacent pairs of dp
@@ -50,9 +71,17 @@ namespace unialgo
         return _mm_cvtsd_f64(res);
     }
 
-    // computes dot product between p1 and p2
-    // result might be different from non-vectorized way because of float arithmetic
-    // it is expected that p1 and p2 are aligned allocated with type, and that the 2 vectors have the same length
+    /**
+     * @brief Computes dot product between p1 and p2
+     *
+     * result might be different from non-vectorized way because of float arithmetic
+     * it is expected that p1 and p2 are aligned allocated with type, and that the 2 vectors have the same length
+     *
+     * @param p1 pointer to first vector
+     * @param p2 pointer to second vector
+     * @param size_p size of vectors
+     * @return float
+     */
     inline float DotProduct(float *p1, float *p2, size_t size_p)
     {
         constexpr int num_float = 8;                                              // number of floats in __m256
@@ -99,9 +128,17 @@ namespace unialgo
         return partial + rest;
     }
 
-    // computes dot product between p1 and p2
-    // result might be different from non-vectorized way because of float arithmetic
-    // it is expected that p1 and p2 are aligned allocated with type, and that the 2 vectors have the same length
+    /**
+     * @brief Computes dot product between p1 and p2
+     *
+     *  Result might be different from non-vectorized way because of double arithmetic
+     *  it is expected that p1 and p2 are aligned allocated with type, and that the 2 vectors have the same length
+     *
+     * @param p1 pointer to first vector
+     * @param p2 pointer to second vector
+     * @param size_p size of vectors
+     * @return double
+     */
     inline double DotProduct(double *p1, double *p2, size_t size_p)
     {
         constexpr int num_double = 4;                                              // number of doubles in __m256
