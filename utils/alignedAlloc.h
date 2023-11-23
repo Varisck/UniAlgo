@@ -20,7 +20,7 @@ namespace unialgo
 
         void aligned_free(void *memblock);
 
-    }
-}
+    } // end namespace utils
+} // end namespace unialgo
 
 #endif // UNIALGO_ALIGNED_ALLOC_
