@@ -92,33 +92,37 @@ namespace unialgo
 
         __m256 c[num_counters];
         __m256 a, b;
+        float partial = 0.0;
 
-        for (int i = 0; i < num_counters; ++i)
-        {
-            a = _mm256_load_ps(p1 + num_float * i);
-            b = _mm256_load_ps(p2 + num_float * i);
-            c[i] = _mm256_mul_ps(a, b);
-        }
-        p1 += increment_evry_loop;
-        p2 += increment_evry_loop;
-
-        for (; p1 < p1_end; p1 += increment_evry_loop, p2 += increment_evry_loop)
+        if (p1 != p1_end && size_p > increment_evry_loop)
         {
             for (int i = 0; i < num_counters; ++i)
             {
                 a = _mm256_load_ps(p1 + num_float * i);
                 b = _mm256_load_ps(p2 + num_float * i);
-                c[i] = _mm256_fmadd_ps(a, b, c[i]);
+                c[i] = _mm256_mul_ps(a, b);
             }
-        }
+            p1 += increment_evry_loop;
+            p2 += increment_evry_loop;
 
-        for (int i = 1; i < num_counters; ++i)
-        {
-            c[0] = _mm256_add_ps(c[0], c[i]);
+            for (; p1 < p1_end; p1 += increment_evry_loop, p2 += increment_evry_loop)
+            {
+                for (int i = 0; i < num_counters; ++i)
+                {
+                    a = _mm256_load_ps(p1 + num_float * i);
+                    b = _mm256_load_ps(p2 + num_float * i);
+                    c[i] = _mm256_fmadd_ps(a, b, c[i]);
+                }
+            }
+
+            for (int i = 1; i < num_counters; ++i)
+            {
+                c[0] = _mm256_add_ps(c[0], c[i]);
+            }
+            partial = horizontal_add_ps(c[0]);
         }
-        float partial = horizontal_add_ps(c[0]);
         float rest = 0.0f;
-        if (size_p % increment_evry_loop != 0)
+        if (size_p % increment_evry_loop != 0 || size_p < increment_evry_loop)
         {
             for (; p1 < real_p1_end; ++p1, ++p2)
             {
