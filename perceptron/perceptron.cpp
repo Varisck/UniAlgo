@@ -54,17 +54,10 @@ namespace unialgo
             double target = *(train_set + train_set_vec_size - 1);
             *(train_set + train_set_vec_size - 1) = -1;
 
-            std::cout << "target: " << target << std::endl;
-            for (int i = 0; i < train_set_vec_size; ++i)
-            {
-                std::cout << *(train_set + i) << " ";
-            }
-            std::cout << std::endl;
-
             double res = DotProduct(train_set, weights_, train_set_vec_size);
-            std::cout << "dotProd res: " << res << std::endl;
 
-            if (res >= 0 && target != 1)
+            // vectorize operation
+            if (res >= 0 && target == 0)
             {
                 /// t = 0 and y = 1
                 /// w' = w - x
@@ -87,6 +80,7 @@ namespace unialgo
 
     bool Perceptron::test(double *test_vec)
     {
+        // use memcopy
         double *test_vec_with_delta = static_cast<double *>(utils::aligned_alloc(weightSize, (input_size_ + 1) * weightSize));
         for (int i = 0; i < input_size_; ++i)
         {
