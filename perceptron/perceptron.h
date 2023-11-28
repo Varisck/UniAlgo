@@ -42,6 +42,9 @@ namespace unialgo
         /// train_set[i] = [0, ..., input_size_ - 1, T] T = target
         void Train(double *train_set, std::size_t train_set_size);
 
+        /// @brief test vector test_vec of size input_size_
+        bool test(double *test_vec);
+
     private:
         std::size_t input_size_;      /// size of input vector
         std::size_t weight_vec_size_; /// size of weights vector

@@ -68,13 +68,34 @@ namespace unialgo
             {
                 /// t = 0 and y = 1
                 /// w' = w - x
+                for (std::size_t i = 0; i < weight_vec_size_; ++i)
+                {
+                    weights_[i] -= train_set[i];
+                }
             }
             else if (res < 0 && target == 1)
             {
                 /// t = 1 and y = 0
                 /// w' = w + x
+                for (std::size_t i = 0; i < weight_vec_size_; ++i)
+                {
+                    weights_[i] += train_set[i];
+                }
             }
         }
+    }
+
+    bool Perceptron::test(double *test_vec)
+    {
+        double *test_vec_with_delta = static_cast<double *>(utils::aligned_alloc(weightSize, (input_size_ + 1) * weightSize));
+        for (int i = 0; i < input_size_; ++i)
+        {
+            test_vec_with_delta[i] = test_vec[i];
+        }
+        test_vec_with_delta[input_size_] = -1;
+        double res = DotProduct(test_vec_with_delta, weights_, input_size_ + 1);
+        unialgo::utils::aligned_free(test_vec_with_delta);
+        return res >= 0;
     }
 
 } // end namespace unialgo
