@@ -149,32 +149,37 @@ namespace unialgo
 
         __m256d c[num_counters];
         __m256d a, b;
+        double partial = 0.0;
 
-        for (int i = 0; i < num_counters; ++i)
+        if (p1 != p1_end && size_p > increment_evry_loop)
         {
-            a = _mm256_load_pd(p1 + num_double * i);
-            b = _mm256_load_pd(p2 + num_double * i);
-            c[i] = _mm256_mul_pd(a, b);
-        }
-        p1 += increment_evry_loop;
-        p2 += increment_evry_loop;
 
-        for (; p1 < p1_end; p1 += increment_evry_loop, p2 += increment_evry_loop)
-        {
             for (int i = 0; i < num_counters; ++i)
             {
                 a = _mm256_load_pd(p1 + num_double * i);
                 b = _mm256_load_pd(p2 + num_double * i);
-                c[i] = _mm256_fmadd_pd(a, b, c[i]);
+                c[i] = _mm256_mul_pd(a, b);
             }
+            p1 += increment_evry_loop;
+            p2 += increment_evry_loop;
+
+            for (; p1 < p1_end; p1 += increment_evry_loop, p2 += increment_evry_loop)
+            {
+                for (int i = 0; i < num_counters; ++i)
+                {
+                    a = _mm256_load_pd(p1 + num_double * i);
+                    b = _mm256_load_pd(p2 + num_double * i);
+                    c[i] = _mm256_fmadd_pd(a, b, c[i]);
+                }
+            }
+            for (int i = 1; i < num_counters; ++i)
+            {
+                c[0] = _mm256_add_pd(c[0], c[i]);
+            }
+            partial = horizontal_add_pd(c[0]);
         }
-        for (int i = 1; i < num_counters; ++i)
-        {
-            c[0] = _mm256_add_pd(c[0], c[i]);
-        }
-        double partial = horizontal_add_pd(c[0]);
         double rest = 0.0;
-        if (size_p % increment_evry_loop != 0)
+        if (size_p % increment_evry_loop != 0 || size_p < increment_evry_loop)
         {
             for (; p1 < real_p1_end; ++p1, ++p2)
             {
