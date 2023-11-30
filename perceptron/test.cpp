@@ -49,7 +49,7 @@ int main()
         testVec[0] = distribution(device);
         testVec[1] = distribution(device);
         testVec[2] = distribution(device);
-        bool res = p.test(testVec);
+        bool res = p.Test(testVec);
         std::cout << "result of test using vector ("
                   << testVec[0] << ", " << testVec[1] << ", " << testVec[2]
                   << ") is : " << res << " target: " << target << std::endl;
