@@ -13,17 +13,7 @@ namespace unialgo
         input_size_ = inputSize;
         weight_vec_size_ = inputSize + 1;
         weights_ = static_cast<weightType *>(utils::aligned_alloc(weightSize, weightSize * weight_vec_size_));
-        if (weights_ != nullptr)
-        {
-            /// weights initialization:
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<weightType> dis(0.0f, 1.0f);
-            for (size_t i = 0; i < weight_vec_size_; ++i)
-            {
-                weights_[i] = dis(gen);
-            }
-        }
+        (*this).InitializeRandomWeights();
     }
 
     Perceptron::~Perceptron()
@@ -35,18 +25,19 @@ namespace unialgo
         }
     }
 
-    void Perceptron::PrintWeights()
+    void Perceptron::PrintWeights(std::ostream &os = std::cout)
     {
-        std::cout << "Weights vector size: " << weight_vec_size_ << std::endl;
+        os << "Weights vector size: " << weight_vec_size_ << std::endl;
         for (std::size_t i = 0; i < weight_vec_size_; ++i)
         {
-            std::cout << weights_[i] << " ";
+            os << weights_[i] << " ";
         }
-        std::cout << std::endl;
+        os << std::endl;
     }
 
     void Perceptron::Train(double *train_set, std::size_t train_set_size)
     {
+        (*this).InitializeRandomWeights();
         const std::size_t train_set_vec_size = input_size_ + 1;
         double *train_set_end = train_set + (train_set_size * train_set_vec_size);
         for (; train_set < train_set_end; train_set += train_set_vec_size)
@@ -78,7 +69,7 @@ namespace unialgo
         }
     }
 
-    bool Perceptron::test(double *test_vec)
+    bool Perceptron::Test(double *test_vec)
     {
         // use memcopy
         double *test_vec_with_delta = static_cast<double *>(utils::aligned_alloc(weightSize, (input_size_ + 1) * weightSize));
@@ -90,6 +81,21 @@ namespace unialgo
         double res = DotProduct(test_vec_with_delta, weights_, input_size_ + 1);
         unialgo::utils::aligned_free(test_vec_with_delta);
         return res >= 0;
+    }
+
+    void Perceptron::InitializeRandomWeights()
+    {
+        if (weights_ != nullptr)
+        {
+            /// weights initialization:
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<weightType> dis(0.0f, 1.0f);
+            for (size_t i = 0; i < weight_vec_size_; ++i)
+            {
+                weights_[i] = dis(gen);
+            }
+        }
     }
 
 } // end namespace unialgo
