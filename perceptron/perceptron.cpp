@@ -25,7 +25,7 @@ namespace unialgo
         }
     }
 
-    void Perceptron::PrintWeights(std::ostream &os = std::cout)
+    void Perceptron::PrintWeights(std::ostream &os)
     {
         os << "Weights vector size: " << weight_vec_size_ << std::endl;
         for (std::size_t i = 0; i < weight_vec_size_; ++i)
