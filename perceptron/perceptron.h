@@ -43,11 +43,30 @@ namespace unialgo
         void PrintWeights(std::ostream &os = std::cout);
 
         /**
+         * @brief Train function using Gradiant Descent
+         *
+         * @details Number of columns in training data has to be input_size_ + 1
+         * last position [input_size_] = targetValue (0 or 1)
+         * Ex: train_set[i] = [0, ..., input_size_ - 1, T] T = target.
+         * To correct the error this function uses Gradiant Descent w' = w + (t - y)x
+         *
+         * @tparam T type of train_set
+         * @param train_set Pointer to matrix (contiguous memory) of training data
+         * @param train_set_size Number of rows in training data Delta_w[i] = mu(sum_{data in dataset}(t - y)(x[i]))
+         * @param mu Learning rate
+         *
+         * @todo implement choose option to implement (batch, mini-batch, single)
+         *
+         */
+        template <typename T>
+        void TrainGD(T *train_set, std::size_t train_set_size) {}
+
+        /**
          * @brief Train function for perceptron
          *
-         * Number of columns in training data has to be input_size_ + 1
-         * position input_size_ = target value (0 or 1)
-         * train_set[i] = [0, ..., input_size_ - 1, T] T = target.
+         * @details Number of columns in training data has to be input_size_ + 1
+         * last position [input_size_] = targetValue (0 or 1)
+         * Ex: train_set[i] = [0, ..., input_size_ - 1, T] T = target.
          * To correct the error this train function uses w' = w + (t - y)x
          *
          * @tparam T type of train_set
@@ -69,7 +88,7 @@ namespace unialgo
                 T target = *(train_set + train_set_vec_size - 1);
                 *(train_set + train_set_vec_size - 1) = -1;
 
-                // dot product
+                // dot product <train_set, weights_> to get res from perceptron
                 double res = DotProduct(train_set);
 
                 // Fixing error in response
@@ -107,8 +126,8 @@ namespace unialgo
             }
         }
 
-// define UNIALGO_USE_AVX to have Train function with AVX
-#ifdef UNIALGO_USE_AVX
+// define __UNIALGO_USE_AVX to have Train function with AVX
+#ifdef __UNIALGO_USE_AVX
 #include "UniAlgo/dotProduct/dotProduct.h"
 
         /**
@@ -140,7 +159,7 @@ namespace unialgo
                 FixErrorInTraining(train_set, res, target);
             }
         }
-#endif // UNIALGO_USE_AVX
+#endif // __UNIALGO_USE_AVX
 
     private:
         std::size_t input_size_;      /// size of input vector
