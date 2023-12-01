@@ -47,7 +47,8 @@ void TestPerceptronReal(std::size_t train_set_size, std::uniform_real_distributi
 
     assert(dist_c1 + dist_c2 == train_set_size);
 
-    p.Train<T>(train_set, train_set_size);
+    p.TrainGD<T>(train_set, train_set_size, 0.2);
+    // p.Train<T>(train_set, train_set_size);
     unialgo::utils::aligned_free(train_set);
     p.PrintWeights();
 
@@ -148,7 +149,7 @@ int main()
 {
     TestPerceptronReal<double>(600, std::uniform_real_distribution<double>(0.0, 2.0),
                                std::uniform_real_distribution<double>(6.0, 9.0));
-    TestPerceptron<int>(600, std::uniform_int_distribution<int>(0, 20),
-                        std::uniform_int_distribution<int>(40, 60));
+    // TestPerceptron<int>(600, std::uniform_int_distribution<int>(0, 20),
+    //                     std::uniform_int_distribution<int>(40, 60));
     return 0;
 }

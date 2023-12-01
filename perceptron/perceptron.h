@@ -5,8 +5,9 @@
  *   \file perceptron.h
  *   @brief Header file defining class perceptron
  *
- *  Simple implementation of a perceptron. Uses implementation of vectorized operation
- *  in dotProduct.h.
+ *  @details Simple implementation of a perceptron.
+ *
+ *  Uses implementation of vectorized operation in dotProduct.h if __UNIALGO_USE_AVX is defined.
  */
 
 #include <memory>
@@ -59,7 +60,26 @@ namespace unialgo
          *
          */
         template <typename T>
-        void TrainGD(T *train_set, std::size_t train_set_size) {}
+        void TrainGD(T *train_set, std::size_t train_set_size, double mu)
+        {
+            (*this).InitializeRandomWeights();
+
+            const std::size_t train_set_vec_size = input_size_ + 1;                     // size of training vector input_size + target_value
+            const T *train_set_end = train_set + (train_set_size * train_set_vec_size); // pointer to end of train_set
+
+            for (; train_set < train_set_end; train_set += train_set_vec_size)
+            {
+                // getting target value of training case and setting delta inputValue to -1
+                T target = *(train_set + train_set_vec_size - 1);
+                *(train_set + train_set_vec_size - 1) = -1;
+
+                // dot product <train_set, weights_> to get res from perceptron
+                double res = DotProduct(train_set);
+
+                // Fixing error in response
+                FixErrorWithGD(train_set, res, target, mu);
+            }
+        }
 
         /**
          * @brief Train function for perceptron
@@ -172,7 +192,7 @@ namespace unialgo
         void InitializeRandomWeights();
 
         template <typename T>
-        void FixErrorInTraining(T *train_set, double perceptronRes, T target)
+        void inline FixErrorInTraining(T *train_set, double perceptronRes, T target)
         {
             if (perceptronRes >= 0 && target == 0)
             {
@@ -189,6 +209,17 @@ namespace unialgo
                 {
                     weights_[i] += train_set[i];
                 }
+            }
+        }
+
+        template <typename T>
+        void inline FixErrorWithGD(T *train_set, double perceptronRes, T target, double mu)
+        {
+            perceptronRes = perceptronRes >= 0;
+            for (std::size_t i = 0; i < weight_vec_size_; ++i)
+            {
+                std::cout << (target - perceptronRes) << std::endl;
+                weights_[i] += ((target - perceptronRes) * train_set[i] * mu);
             }
         }
 
