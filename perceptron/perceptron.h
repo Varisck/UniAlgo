@@ -12,6 +12,8 @@
 #include <memory>
 #include <iostream>
 
+#include "UniAlgo/utils/alignedAlloc.h"
+
 namespace unialgo
 {
 
@@ -24,7 +26,7 @@ namespace unialgo
         /**
          * @brief Construct a new Perceptron object
          *
-         * @param inputSize size of input connection vector of perceptron
+         * @param inputSize size of input vector of perceptron
          */
         explicit Perceptron(std::size_t inputSize);
 
@@ -48,32 +50,139 @@ namespace unialgo
          * train_set[i] = [0, ..., input_size_ - 1, T] T = target.
          * To correct the error this train function uses w' = w + (t - y)x
          *
+         * @tparam T type of train_set
          * @param train_set Pointer to matrix (contiguous memory) of training data
          * @param train_set_size Number of rows in training data
+         *
          */
-        void Train(double *train_set, std::size_t train_set_size);
+        template <typename T>
+        void Train(T *train_set, std::size_t train_set_size)
+        {
+            (*this).InitializeRandomWeights();
+
+            const std::size_t train_set_vec_size = input_size_ + 1;
+            const T *train_set_end = train_set + (train_set_size * train_set_vec_size);
+
+            for (; train_set < train_set_end; train_set += train_set_vec_size)
+            {
+                // getting target value of training case and setting delta inputValue to -1
+                T target = *(train_set + train_set_vec_size - 1);
+                *(train_set + train_set_vec_size - 1) = -1;
+
+                // dot product
+                double res = DotProduct(train_set);
+
+                // Fixing error in response
+                FixErrorInTraining(train_set, res, target);
+            }
+        }
 
         /**
          * @brief Function to test one input vector
          *
-         * Return value is <w, x> >= 0
+         * Return value is equation: <w, x> >= 0
          *
+         * @tparam T type of input_vec
          * @param test_vec Input vector to test size: input_size_
          * @return true T = 1
          * @return false T = 0
+         *
          */
-        bool Test(double *test_vec);
+        template <typename T>
+        bool Test(T *test_vec)
+        {
+            {
+                // use memcopy create vector with inputValue for delta
+                T *test_vec_with_delta = static_cast<T *>(utils::aligned_alloc(sizeof(T), (input_size_ + 1) * sizeof(T)));
+                for (int i = 0; i < input_size_; ++i)
+                {
+                    test_vec_with_delta[i] = test_vec[i];
+                }
+                // set inputValue of delta to -1
+                test_vec_with_delta[input_size_] = -1;
+                double res = DotProduct(test_vec_with_delta);
+
+                unialgo::utils::aligned_free(test_vec_with_delta);
+                return res >= 0;
+            }
+        }
+
+// define UNIALGO_USE_AVX to have Train function with AVX
+#ifdef UNIALGO_USE_AVX
+#include "UniAlgo/dotProduct/dotProduct.h"
+
+        /**
+         * @brief Train function for perceptron with AVX
+         *
+         * Number of columns in training data has to be input_size_ + 1
+         * position input_size_ = target value (0 or 1)
+         * train_set[i] = [0, ..., input_size_ - 1, T] T = target.
+         * To correct the error this train function uses w' = w + (t - y)x
+         *
+         * @param train_set Pointer to matrix (contiguous memory) of training data
+         * @param train_set_size Number of rows in training data
+         */
+        void Train(double *train_set, std::size_t train_set_size)
+        {
+            (*this).InitializeRandomWeights();
+
+            const std::size_t train_set_vec_size = input_size_ + 1;
+            double *train_set_end = train_set + (train_set_size * train_set_vec_size);
+
+            for (; train_set < train_set_end; train_set += train_set_vec_size)
+            {
+                // getting target value of training case and setting delta inputValue to -1
+                double target = *(train_set + train_set_vec_size - 1);
+                *(train_set + train_set_vec_size - 1) = -1;
+
+                double res = math::DotProduct(train_set, weights_, train_set_vec_size);
+                // Fixing error in response
+                FixErrorInTraining(train_set, res, target);
+            }
+        }
+#endif // UNIALGO_USE_AVX
 
     private:
         std::size_t input_size_;      /// size of input vector
         std::size_t weight_vec_size_; /// size of weights vector
         weightType *weights_;         /// weights pointer (need to be aligned allocated for avx)
-        // std::unique_ptr<weightType> _weights; /// weights pointer (need to be aligned allocated for avx)
 
         /**
          * @brief This function initialized the weights_ vector to random 64-bit precision values
          */
         void InitializeRandomWeights();
+
+        template <typename T>
+        void FixErrorInTraining(T *train_set, double perceptronRes, T target)
+        {
+            if (perceptronRes >= 0 && target == 0)
+            {
+                /// t = 0 and y = 1 ===> w' = w - x
+                for (std::size_t i = 0; i < weight_vec_size_; ++i)
+                {
+                    weights_[i] -= train_set[i];
+                }
+            }
+            else if (perceptronRes < 0 && target == 1)
+            {
+                /// t = 1 and y = 0 ===> w' = w + x
+                for (std::size_t i = 0; i < weight_vec_size_; ++i)
+                {
+                    weights_[i] += train_set[i];
+                }
+            }
+        }
+
+        template <typename T>
+        inline double DotProduct(T *vec)
+        {
+            double res = 0.0;
+            for (std::size_t i = 0; i < weight_vec_size_; ++i)
+            {
+                res += vec[i] * weights_[i];
+            }
+            return res;
+        }
 
     }; // end class Perceptron
 

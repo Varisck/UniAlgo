@@ -1,4 +1,8 @@
+# vscode dir
 .vscode/
+
+# all cpp file ./UniAlgo/*.cpp
+*.cpp
 
 # Prerequisites
 *.d
