@@ -63,11 +63,10 @@ class Perceptron {
   void TrainGD(T *train_set, std::size_t train_set_size, double mu) {
     (*this).InitializeRandomWeights();
 
-    const std::size_t train_set_vec_size =
-        input_size_ + 1;  // size of training vector input_size + target_value
-    const T *train_set_end =
-        train_set +
-        (train_set_size * train_set_vec_size);  // pointer to end of train_set
+    // size of training vector input_size + target_value
+    const std::size_t train_set_vec_size = input_size_ + 1;
+    // pointer to end of train_set
+    const T *train_set_end = train_set + (train_set_size * train_set_vec_size);
 
     for (; train_set < train_set_end; train_set += train_set_vec_size) {
       // getting target value of training case and setting delta inputValue to
@@ -181,10 +180,10 @@ class Perceptron {
 #endif  // __UNIALGO_USE_AVX
 
  private:
-  std::size_t input_size_;       /// size of input vector
-  std::size_t weight_vec_size_;  /// size of weights vector
+  std::size_t input_size_;       // size of input vector
+  std::size_t weight_vec_size_;  // size of weights vector
   weightType
-      *weights_;  /// weights pointer (need to be aligned allocated for avx)
+      *weights_;  // weights pointer (need to be aligned allocated for avx)
 
   /**
    * @brief This function initialized the weights_ vector to random 64-bit
