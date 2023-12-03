@@ -1,8 +1,7 @@
 # vscode dir
 .vscode/
 
-# all cpp file ./UniAlgo/*.cpp
-*.cpp
+/testingLocal/*
 
 # Prerequisites
 *.d
