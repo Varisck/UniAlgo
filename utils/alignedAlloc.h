@@ -9,18 +9,16 @@
  *
  */
 
-#include <cstddef> //std::size_t
+#include <cstddef>  //std::size_t
 
-namespace unialgo
-{
-    namespace utils
-    {
+namespace unialgo {
+namespace utils {
 
-        void *aligned_alloc(std::size_t alignment, std::size_t size);
+void *aligned_alloc(std::size_t alignment, std::size_t size);
 
-        void aligned_free(void *memblock);
+void aligned_free(void *memblock);
 
-    } // end namespace utils
-} // end namespace unialgo
+}  // end namespace utils
+}  // end namespace unialgo
 
-#endif // UNIALGO_ALIGNED_ALLOC_
+#endif  // UNIALGO_ALIGNED_ALLOC_
