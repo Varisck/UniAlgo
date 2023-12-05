@@ -1,10 +1,12 @@
-enable_testing()
 
 add_library("pattern")
 target_sources("pattern" PRIVATE "stringMatching.hpp" "stringMatching.cpp")
 
+enable_testing()
 add_executable(
   match_test
+  stringMatching.hpp
+  stringMatching.cpp
   match_test.cc
 )
 
