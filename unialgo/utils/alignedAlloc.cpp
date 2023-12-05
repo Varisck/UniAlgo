@@ -1,4 +1,4 @@
-#include "UniAlgo/utils/alignedAlloc.h"
+#include "unialgo/utils/alignedAlloc.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 /// definition for linux and apple compilers

@@ -5,10 +5,19 @@
 #include <unordered_map>
 #include <vector>
 
+/**
+ * @brief Implementation of pattern matching with std::string
+ * \file stringMatching.hpp
+ *
+ * this file contains implementatino of exact string matching on std::string
+ * all the string matching algo are in the unialgo::pattern namespace
+ */
+
 namespace unialgo {
 
 namespace pattern {
 
+// Used to containt transition function for finate state automata
 struct TransitionFunction {
   std::vector<std::vector<std::size_t>> tf;      // transition function
   std::unordered_map<char, std::size_t> lookup;  // loockup table char -> col

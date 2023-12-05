@@ -14,7 +14,7 @@
 #include <iostream>
 #include <memory>
 
-#include "UniAlgo/utils/alignedAlloc.h"
+#include "unialgo/utils/alignedAlloc.h"
 
 namespace unialgo {
 

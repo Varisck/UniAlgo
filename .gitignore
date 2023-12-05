@@ -3,6 +3,9 @@
 
 /testingLocal/*
 
+# build dir of cmake
+build/
+
 # Prerequisites
 *.d
 

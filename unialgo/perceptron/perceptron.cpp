@@ -1,9 +1,9 @@
-#include "UniAlgo/perceptron/perceptron.h"
+#include "unialgo/perceptron/perceptron.h"
 
 #include <iostream>
 #include <random>
 
-#include "UniAlgo/utils/alignedAlloc.h"
+#include "unialgo/utils/alignedAlloc.h"
 
 namespace unialgo {
 

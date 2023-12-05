@@ -3,8 +3,8 @@
 #include <iostream>
 #include <random>
 
-#include "UniAlgo/perceptron/perceptron.h"
-#include "UniAlgo/utils/alignedAlloc.h"
+#include "unialgo/perceptron/perceptron.h"
+#include "unialgo/utils/alignedAlloc.h"
 
 template <typename T>
 void TestPerceptronReal(std::size_t train_set_size,
