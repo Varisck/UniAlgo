@@ -3,10 +3,14 @@ project(unialgo)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_TESTS ${CMAKE_BINARY_DIR}/tests)
+
 
 #add_compile_options(/I ${CMAKE_SOURCE_DIR}/)
 include_directories("${PROJECT_SOURCE_DIR}/")
 
+enable_testing()
 
 add_subdirectory(unialgo)
 
