@@ -4,6 +4,8 @@
 ## Contributing
 I'm happy to receive and actively encourage code reviews. Constructive feedback not only improves the quality of the code but also provides an excellent opportunity to learn and enhance our understanding of C++ best practices. Feel free to share your insights, suggestions, and recommendations. 
 
+This is the first official project where I use CMake. Help and suggestions are more than welcomed!
+
 ### Contact
 
 If you have questions, suggestions, or just want to discuss the project, feel free to open an issue, make a pull request, or contact me directly on [GitHub](https://github.com/Varisck).

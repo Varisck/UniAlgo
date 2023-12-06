@@ -27,6 +27,12 @@ struct TransitionFunction {
  * @brief Find occurrences of pattern p in text t
  *
  * @details this function implements a finite state automata algorithm
+ * this function calls pattern::MakeTransitionFunction and then scans the
+ * input text.
+ *
+ * Time Complexity of search: O(n) + O(m * |Sigma|) where:
+ *    n is size of text t linear scan
+ *    m * |Sigma| is makeTransitionFunction call
  *
  * @param t text
  * @param p pattern
@@ -34,8 +40,16 @@ struct TransitionFunction {
  */
 std::vector<std::size_t> Fsa(std::string t, std::string p);
 
+// TODO: implement Fsa with transitionFunction as argument (reuse of transition
+// function for same pattern)
+
 /**
  * @brief This functino creates the transition function for the automata in FSA
+ *
+ * Time Complexity: O(m * |Sigma|) where:
+ *    Sigma = unique_chars in pattern p
+ *    m size of pattern p
+ *    the |Sigma| comes from std::vector operator= Linear in size
  *
  * @param p pattern
  * @return TransitionFuction transition
@@ -54,6 +68,16 @@ TransitionFunction MakeTransitionFunction(std::string p);
  * @return std::vector<std::size_t> vector containing occurrences
  */
 std::vector<std::size_t> Kmp(std::string t, std::string p);
+
+/**
+ * @brief Builds the prefix functino for kmp (aka failure function)
+ *
+ * Time Complexity:
+ *
+ * @param p
+ * @return std::vector<std::size_t>
+ */
+std::vector<std::size_t> MakePrefixFunction(std::string p);
 
 /**
  * @brief Find occurrences of pattern p in text t
