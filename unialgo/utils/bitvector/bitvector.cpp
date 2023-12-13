@@ -25,7 +25,8 @@ bool utils::Bitvector::GetBit(std::size_t bit_pos) {
 }
 
 utils::Bitvector::Reference utils::Bitvector::operator[](std::size_t bit_pos) {
-  return bits_[std::floor(bit_pos / type_size)];
+  return BitvectorReference(bits_[std::floor(bit_pos / type_size)],
+                            std::floor(bit_pos / type_size));
 }
 
 }  // namespace unialgo
