@@ -2,6 +2,7 @@
 .vscode/
 
 /testingLocal/*
+/testing
 
 # build dir of cmake
 build/
