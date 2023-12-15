@@ -7,8 +7,11 @@ namespace unialgo {
 
 namespace utils {
 
-// list of single bit sets
-// position i in bit_set = word with i-th bit set
+/**
+ * @brief list of powers of 2,
+ * position i in bit_set = word with i-th bit set
+ *
+ */
 static const uint64_t bit_set[] = {
     1,
     2,
