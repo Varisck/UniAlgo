@@ -1,5 +1,5 @@
 add_library("bitvector" "")
-target_sources("bitvector" PUBLIC "bitvector.hpp" "bitMaps.hpp" "bitvector.cpp")
+target_sources("bitvector" PUBLIC "bitvector.hpp" "bitMaps.hpp" "bitvector.cpp" "wordVector.hpp")
 add_library(unialgo::utils::bitvector ALIAS "bitvector")
 
 # tests: 

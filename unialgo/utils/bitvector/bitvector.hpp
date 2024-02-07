@@ -17,7 +17,7 @@ namespace unialgo {
 
 namespace utils {
 
-// forword decleration
+// forward decleration
 class BitvectorReference;
 
 /**

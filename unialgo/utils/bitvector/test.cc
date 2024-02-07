@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "unialgo/utils/bitvector/bitvector.hpp"
+#include "unialgo/utils/bitvector/wordVector.hpp"
 
 namespace {
 
@@ -81,6 +82,69 @@ TEST(TestBitvectorReference, TestCompOperator) {
   EXPECT_EQ(bvR8, bvR9);
   EXPECT_EQ(bv[0], bv[1]);
   EXPECT_EQ(bv[0] == bv[1], 1);
+}
+
+// ============ Testing WordVector ============
+
+// Testing getNumBits
+TEST(TestingWordVector, getNumBits) {
+  unialgo::utils::WordVector<2> wv(10);
+
+  EXPECT_EQ(wv.getNumBits(), 20);
+}
+
+TEST(TestingWordVector, accessOperator) {
+  unialgo::utils::WordVector<2> wv(10);
+
+  wv[0] = 1;
+
+  EXPECT_EQ(wv[0].getValue(), 1);
+  for (int i = 1; i < 10; ++i) EXPECT_EQ(wv[i].getValue(), 0);
+}
+
+// testing that only the referenced 2 bits could change
+TEST(TestingWordVector, accessingOverBitSize) {
+  unialgo::utils::WordVector<2> wv(10);
+
+  wv[0] = 8;
+
+  for (int i = 0; i < 10; ++i) EXPECT_EQ(wv[i].getValue(), 0);
+}
+
+// testing operator == in reference
+TEST(TestingWordVector, referenceComparingWithArithmeticType) {
+  unialgo::utils::WordVector<2> wv(10);
+
+  wv[0] = 8;
+  wv[2] = 1;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 0);
+  EXPECT_EQ(wv[2], 1);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+}
+
+// testing operator == in reference
+TEST(TestingWordVector, compareRefRef) {
+  unialgo::utils::WordVector<2> wv(10);
+
+  wv[0] = 2;
+  wv[1] = 2;
+  wv[2] = 1;
+  wv[3] = 1;
+
+  EXPECT_EQ(wv[0], 2);
+  EXPECT_EQ(wv[1], 2);
+  EXPECT_EQ(wv[2], 1);
+  EXPECT_EQ(wv[3], 1);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+  EXPECT_NE(wv[0], wv[2]);
+  EXPECT_NE(wv[2], wv[0]);
+  EXPECT_EQ(wv[0], wv[1]);
+  EXPECT_EQ(wv[2], wv[3]);
 }
 
 }  // namespace
