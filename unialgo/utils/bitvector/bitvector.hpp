@@ -65,6 +65,13 @@ class Bitvector {
    */
   bool GetBit(std::size_t bit_pos);
 
+  /**
+   * @brief Gettter for num_bits_
+   *
+   * @return std::size_t num_bits_ inside Bitvector
+   */
+  std::size_t getNumBits();
+
  private:
   std::vector<Type> bits_;  // vector containing bits
   std::size_t num_bits_;    // number of bits in bits_
@@ -145,8 +152,8 @@ class BitvectorReference {
   }
 
  private:
+  Bitvector::Type& value_;  // word referenced in Bitvector
   std::size_t position_;    // position of bit in word
-  Bitvector::Type& value_;  // word
 };
 
 }  // namespace utils
