@@ -17,29 +17,25 @@ namespace unialgo {
 namespace utils {
 
 // forward decleration
-template <uint8_t word_size>
 class WordVectorRef;
 
 /**
  * @class WordVector
  * implements a bitvector class with custom word bit size
- *
- * @tparam word_size size of word in vector (max val: 64)
  */
-template <uint8_t word_size>
 class WordVector {
  public:
-  using Type = uint64_t;                       // Type used in vector
-  using Reference = WordVectorRef<word_size>;  // reference to bit in vector
+  using Type = uint64_t;            // Type used in vector
+  using Reference = WordVectorRef;  // reference to bit in vector
   static const std::size_t type_size = sizeof(Type) * 8;  // size of Type
 
   /**
    * @brief Construct a new Word Vector object
    *
    * @param num_words num words to store in vector
-   * @param wordSize size of a word (default = word_size)
+   * @param wordSize size of a word (default = 2)
    */
-  WordVector(std::size_t num_words, Type wordSize = word_size);
+  WordVector(std::size_t num_words, Type wordSize = 2);
 
   /**
    * @brief Construct a new Word Vector object
@@ -61,7 +57,21 @@ class WordVector {
    *
    * @return std::size_t number of bits in vector
    */
-  std::size_t getNumBits();
+  std::size_t getNumBits() const;
+
+  /**
+   * @brief Size of vector (num_words_ inside vector)
+   *
+   * @return std::size_t size of vector
+   */
+  std::size_t size() const;
+
+  /**
+   * @brief Get the size of words in vector
+   *
+   * @return uint8_t size of words
+   */
+  uint8_t getWordSize() const;
 
  private:
   std::vector<Type> bits_;  // vector of bits
@@ -69,10 +79,10 @@ class WordVector {
   std::size_t num_words_;   // number of words in bits_
 };
 
-template <uint8_t word_size>
 class WordVectorRef {
  public:
-  WordVectorRef(WordVector<word_size>::Type& value, std::size_t position)
+  WordVectorRef(WordVector::Type& value, std::size_t position,
+                uint8_t word_size)
       : word_size_(word_size), value_(value), position_(position) {}
 
   /**
@@ -94,8 +104,48 @@ class WordVectorRef {
    *
    * @return const WordVector<word_size>::Type
    */
-  const WordVector<word_size>::Type getValue() const {
+  const WordVector::Type getValue() const {
     return utils::read_bits(&value_, position_, word_size_);
+  }
+
+  /**
+   * @brief Prefix increment operator (++a)
+   */
+  WordVectorRef& operator++() {
+    auto value = (*this).getValue();
+    utils::write_bits(&value_, value + 1, position_, word_size_);
+    return *this;
+  }
+
+  /**
+   * @brief Postfix increment operator (a++)
+   *
+   * @return const WordVector<word_size>::Type value before increment
+   */
+  const WordVector::Type operator++(int) {
+    auto value = (*this).getValue();
+    ++(*this);
+    return value;
+  }
+
+  /**
+   * @brief Prefix decrement operator
+   */
+  WordVectorRef& operator--() {
+    auto value = (*this).getValue();
+    utils::write_bits(&value_, value - 1, position_, word_size_);
+    return *this;
+  }
+
+  /**
+   * @brief Postfix decrement operator
+   *
+   * @return const WordVector<word_size>::Type value before decrement
+   */
+  const WordVector::Type operator--(int) {
+    auto value = (*this).getValue();
+    --(*this);
+    return value;
   }
 
   /**
@@ -173,38 +223,10 @@ class WordVectorRef {
   }
 
  private:
-  uint8_t word_size_;     // size of a single word to reference
-  std::size_t position_;  // position where the referenced word starts
-  WordVector<word_size>::Type& value_;  // full word containing ref value
+  uint8_t word_size_;        // size of a single word to reference
+  std::size_t position_;     // position where the referenced word starts
+  WordVector::Type& value_;  // full word containing ref value
 };
-
-// ============ Implementation WordVector ============
-
-template <uint8_t word_size>
-WordVector<word_size>::WordVector()
-    : num_words_(0), word_size_(word_size), bits_(0) {}
-
-template <uint8_t word_size>
-WordVector<word_size>::WordVector(std::size_t num_words,
-                                  WordVector::Type wordSize)
-    : num_words_(num_words),
-      word_size_(word_size),
-      bits_(
-          std::ceil((num_words * word_size) / static_cast<double>(type_size))) {
-}
-
-template <uint8_t word_size>
-std::size_t WordVector<word_size>::getNumBits() {
-  return num_words_ * word_size_;
-}
-
-template <uint8_t word_size>
-WordVector<word_size>::Reference WordVector<word_size>::operator[](
-    std::size_t pos) {
-  return WordVectorRef<word_size>(
-      bits_[std::floor((pos * word_size_) / type_size)],
-      ((pos * word_size_) % type_size));
-}
 
 }  // namespace utils
 }  // namespace unialgo

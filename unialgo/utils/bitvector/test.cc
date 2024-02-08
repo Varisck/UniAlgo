@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "unialgo/utils/bitvector/bitvector.hpp"
-#include "unialgo/utils/bitvector/wordVector.hpp"
+#include "unialgo/utils/bitvector/bitVectors.hpp"
 
 namespace {
 
@@ -88,15 +87,17 @@ TEST(TestBitvectorReference, TestCompOperator) {
 
 // ============ Testing WordVector ============
 
-// Testing getNumBits
-TEST(TestingWordVector, getNumBits) {
-  unialgo::utils::WordVector<2> wv(10);
+// Testing getters
+TEST(TestingWordVector, getters) {
+  unialgo::utils::WordVector wv(10);
 
   EXPECT_EQ(wv.getNumBits(), 20);
+  EXPECT_EQ(wv.getWordSize(), 2);
+  EXPECT_EQ(wv.size(), 10);
 }
 
 TEST(TestingWordVector, accessOperator) {
-  unialgo::utils::WordVector<2> wv(10);
+  unialgo::utils::WordVector wv(10);
 
   wv[0] = 1;
 
@@ -106,7 +107,7 @@ TEST(TestingWordVector, accessOperator) {
 
 // testing that only the referenced 2 bits could change
 TEST(TestingWordVector, accessingOverBitSize) {
-  unialgo::utils::WordVector<2> wv(10);
+  unialgo::utils::WordVector wv(10);
 
   wv[0] = 8;
 
@@ -115,7 +116,7 @@ TEST(TestingWordVector, accessingOverBitSize) {
 
 // testing operator == in reference
 TEST(TestingWordVector, referenceComparingWithArithmeticType) {
-  unialgo::utils::WordVector<2> wv(10);
+  unialgo::utils::WordVector wv(10);
 
   wv[0] = 8;
   wv[2] = 1;
@@ -130,7 +131,7 @@ TEST(TestingWordVector, referenceComparingWithArithmeticType) {
 
 // testing operator == in reference
 TEST(TestingWordVector, compareRefRef) {
-  unialgo::utils::WordVector<2> wv(10);
+  unialgo::utils::WordVector wv(10);
 
   wv[0] = 2;
   wv[1] = 2;
@@ -151,7 +152,7 @@ TEST(TestingWordVector, compareRefRef) {
 
 // testing compare <, >, <=, >=, in reference
 TEST(TestingWordVector, compareRefValues) {
-  unialgo::utils::WordVector<2> wv(10);
+  unialgo::utils::WordVector wv(10);
 
   wv[0] = 0;
   wv[1] = 1;
@@ -169,6 +170,46 @@ TEST(TestingWordVector, compareRefValues) {
   EXPECT_TRUE(wv[0] <= wv[3]);
   EXPECT_TRUE(wv[3] > wv[2]);
   EXPECT_TRUE(wv[3] >= wv[2]);
+}
+
+// testing operator++, operator--
+TEST(TestingWordVector, testIncrementDecrement) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+  wv[0]++;
+  EXPECT_NE(wv[0], 0);
+  EXPECT_EQ(wv[0], 1);
+
+  EXPECT_NE(wv[0]++, 2);
+  EXPECT_EQ(wv[0], 2);
+
+  EXPECT_NE(++wv[0], 2);
+  EXPECT_EQ(wv[0], 3);
+
+  wv[0]--;
+  EXPECT_NE(wv[0], 3);
+  EXPECT_EQ(wv[0], 2);
+
+  EXPECT_NE(wv[0]--, 1);
+  EXPECT_EQ(wv[0], 1);
+
+  EXPECT_NE(--wv[0], 1);
+  EXPECT_EQ(wv[0], 0);
+
+  EXPECT_EQ(wv[0], 0);
+  wv[0]--;
+  EXPECT_EQ(wv[0], 3);
 }
 
 }  // namespace
