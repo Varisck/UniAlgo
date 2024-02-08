@@ -12,6 +12,7 @@ add_executable(
 )
 target_link_libraries(
   match_test
+  unialgo::utils::bitvector
   unialgo::pattern
   GTest::gtest_main
 )

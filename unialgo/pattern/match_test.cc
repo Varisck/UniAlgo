@@ -4,8 +4,52 @@
 #include <vector>
 
 #include "unialgo/pattern/stringMatching.hpp"
+#include "unialgo/utils/bitvector/bitVectors.hpp"
 
 namespace {
+
+TEST(StringWVecConversion, Conversion) {
+  // Test case 1: text with 3 unique chars
+  std::string text = "abababcabab";
+  unialgo::utils::WordVector wv = unialgo::pattern::StringToBitVector(text);
+  EXPECT_EQ(wv.getWordSize(), 2);
+  EXPECT_EQ(wv.size(), text.size());
+
+  for (size_t i = 0; i < text.size(); ++i) {
+    if (text[i] == 'a')
+      EXPECT_EQ(wv[i], 0);
+    else if (text[i] == 'b')
+      EXPECT_EQ(wv[i], 1);
+    else
+      EXPECT_EQ(wv[i], 2);
+  }
+  // Test case 2: Pattern with 5 unique chars
+  text = "abababcababiiipppp";
+  wv = unialgo::pattern::StringToBitVector(text);
+  EXPECT_EQ(wv.getWordSize(), 3);
+  EXPECT_EQ(wv.size(), text.size());
+
+  for (size_t i = 0; i < text.size(); ++i) {
+    if (text[i] == 'a')
+      EXPECT_EQ(wv[i], 0);
+    else if (text[i] == 'b')
+      EXPECT_EQ(wv[i], 1);
+    else if (text[i] == 'c')
+      EXPECT_EQ(wv[i], 2);
+    else if (text[i] == 'i')
+      EXPECT_EQ(wv[i], 3);
+    else
+      EXPECT_EQ(wv[i], 4);
+  }
+}
+
+TEST(StringWVecConversion, ConvertingEmptyString) {
+  // Test case 1: text with 3 unique chars
+  std::string text1 = "";
+  unialgo::utils::WordVector wv = unialgo::pattern::StringToBitVector(text1);
+  EXPECT_EQ(wv.getWordSize(), 0);
+  EXPECT_EQ(wv.size(), text1.size());
+}
 
 TEST(FinateStateAutomataTest, BasicTests) {
   // Test case 1: Pattern occurs multiple times in the text

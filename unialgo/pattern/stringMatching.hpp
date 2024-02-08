@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "unialgo/utils/bitvector/bitVectors.hpp"
+
 /**
  * @brief Implementation of pattern matching with std::string
  * \file stringMatching.hpp
@@ -22,6 +24,22 @@ struct TransitionFunction {
   std::vector<std::vector<std::size_t>> tf;      // transition function
   std::unordered_map<char, std::size_t> lookup;  // loockup table char -> col
 };
+
+/**
+ * @brief Get map unique char -> occurrence in string s
+ *
+ * @param s
+ * @return std::unordered_map<char, std::size_t> unique_char -> occurrence
+ */
+std::unordered_map<char, std::size_t> AlphabetSize(std::string s);
+
+/**
+ * @brief Get bitVector rapresentation of string s
+ *
+ * @param s string to convert
+ * @return utils::WordVector string s rapresented as bitVector
+ */
+utils::WordVector StringToBitVector(std::string s);
 
 /**
  * @brief Find occurrences of pattern p in text t
@@ -44,7 +62,7 @@ std::vector<std::size_t> Fsa(std::string t, std::string p);
 // function for same pattern)
 
 /**
- * @brief This functino creates the transition function for the automata in FSA
+ * @brief This function creates the transition function for the automata in FSA
  *
  * Time Complexity: O(m * |Sigma|) where:
  *    Sigma = unique_chars in pattern p
