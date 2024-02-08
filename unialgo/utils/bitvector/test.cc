@@ -5,6 +5,8 @@
 
 namespace {
 
+// ============ Testing BitVector ============
+
 // Testing operator[] on Bitvector
 TEST(TestBitvector, TestingAccessOperator) {
   unialgo::utils::Bitvector bv(62);
@@ -145,6 +147,28 @@ TEST(TestingWordVector, compareRefRef) {
   EXPECT_NE(wv[2], wv[0]);
   EXPECT_EQ(wv[0], wv[1]);
   EXPECT_EQ(wv[2], wv[3]);
+}
+
+// testing compare <, >, <=, >=, in reference
+TEST(TestingWordVector, compareRefValues) {
+  unialgo::utils::WordVector<2> wv(10);
+
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+  EXPECT_TRUE(wv[0] <= wv[0]);
+  EXPECT_TRUE(wv[0] < wv[3]);
+  EXPECT_TRUE(wv[0] <= wv[3]);
+  EXPECT_TRUE(wv[3] > wv[2]);
+  EXPECT_TRUE(wv[3] >= wv[2]);
 }
 
 }  // namespace

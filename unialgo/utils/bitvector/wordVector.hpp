@@ -89,6 +89,11 @@ class WordVectorRef {
     return *this;
   }
 
+  /**
+   * @brief Get the Value of referenced value
+   *
+   * @return const WordVector<word_size>::Type
+   */
   const WordVector<word_size>::Type getValue() const {
     return utils::read_bits(&value_, position_, word_size_);
   }
@@ -113,6 +118,58 @@ class WordVectorRef {
   friend inline bool operator==(const WordVectorRef& lhs,
                                 const WordVectorRef& rhs) {
     return lhs.getValue() == rhs.getValue();
+  }
+
+  /**
+   * @brief Comparison operator between two WordVectorRef
+   */
+  friend inline bool operator!=(const WordVectorRef& lhs,
+                                const WordVectorRef& rhs) {
+    return !(lhs == rhs);
+  }
+
+  /**
+   * @brief Comparison operator between two WordVectorRef
+   * @return true if bit values referenced by lhs > bit values referenced by
+   * rhs
+   * @return false otherwise
+   */
+  friend inline bool operator>(const WordVectorRef& lhs,
+                               const WordVectorRef& rhs) {
+    return lhs.getValue() > rhs.getValue();
+  }
+
+  /**
+   * @brief Comparison operator between two WordVectorRef
+   * @return true if bit values referenced by lhs < bit values referenced by
+   * rhs
+   * @return false otherwise
+   */
+  friend inline bool operator<(const WordVectorRef& lhs,
+                               const WordVectorRef& rhs) {
+    return lhs.getValue() < rhs.getValue();
+  }
+
+  /**
+   * @brief Comparison operator between two WordVectorRef
+   * @return true if bit values referenced by lhs >= bit values referenced by
+   * rhs
+   * @return false otherwise
+   */
+  friend inline bool operator>=(const WordVectorRef& lhs,
+                                const WordVectorRef& rhs) {
+    return lhs.getValue() >= rhs.getValue();
+  }
+
+  /**
+   * @brief Comparison operator between two WordVectorRef
+   * @return true if bit values referenced by lhs < bit values referenced by
+   * rhs
+   * @return false otherwise
+   */
+  friend inline bool operator<=(const WordVectorRef& lhs,
+                                const WordVectorRef& rhs) {
+    return lhs.getValue() <= rhs.getValue();
   }
 
  private:
