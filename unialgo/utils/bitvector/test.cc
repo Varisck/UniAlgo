@@ -212,4 +212,57 @@ TEST(TestingWordVector, testIncrementDecrement) {
   EXPECT_EQ(wv[0], 3);
 }
 
+// testing ostream on reference
+TEST(TestingWordVector, ostreamWvRef) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+  std::ostringstream oss;
+  oss << wv[0];
+  EXPECT_EQ(oss.str(), "00");
+  oss << wv[1];
+  EXPECT_EQ(oss.str(), "0001");
+  oss << wv[2];
+  EXPECT_EQ(oss.str(), "000110");
+  oss << wv[3];
+  EXPECT_EQ(oss.str(), "00011011");
+}
+
+// testing ostream on reference
+TEST(TestingWordVector, hashFunction) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 0;
+  wv[2] = 2;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 0);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+  EXPECT_EQ(std::hash<unialgo::utils::WordVectorRef>{}(wv[0]),
+            std::hash<unialgo::utils::WordVectorRef>{}(wv[0]));
+  EXPECT_EQ(std::hash<unialgo::utils::WordVectorRef>{}(wv[0]),
+            std::hash<unialgo::utils::WordVectorRef>{}(wv[1]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorRef>{}(wv[0]),
+            std::hash<unialgo::utils::WordVectorRef>{}(wv[2]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorRef>{}(wv[0]),
+            std::hash<unialgo::utils::WordVectorRef>{}(wv[3]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorRef>{}(wv[3]),
+            std::hash<unialgo::utils::WordVectorRef>{}(wv[2]));
+}
+
 }  // namespace

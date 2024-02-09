@@ -2,7 +2,9 @@
 #define UNIALGO_STRINGMATCHING_
 
 #include <string>
+#include <type_traits>
 #include <unordered_map>
+#include <utility>  //declval
 #include <vector>
 
 #include "unialgo/utils/bitvector/bitVectors.hpp"
@@ -11,8 +13,12 @@
  * @brief Implementation of pattern matching with std::string
  * \file stringMatching.hpp
  *
- * this file contains implementatino of exact string matching on std::string
+ * this file contains definition of exact string matching functions on
+ * std::string
+ *
  * all the string matching algo are in the unialgo::pattern namespace
+ *
+ * Fsa, Kmp, Byg
  */
 
 namespace unialgo {
@@ -20,26 +26,21 @@ namespace unialgo {
 namespace pattern {
 
 // Used to containt transition function for finate state automata
+// struct TransitionFunction {
+//   std::vector<std::vector<std::size_t>> tf;      // transition function
+//   std::unordered_map<char, std::size_t> lookup;  // loockup table char -> col
+// };
+
+// Used to containt transition function for finate state automata
+template <typename T>
 struct TransitionFunction {
-  std::vector<std::vector<std::size_t>> tf;      // transition function
-  std::unordered_map<char, std::size_t> lookup;  // loockup table char -> col
+  std::vector<std::vector<std::size_t>> tf;  // transition function
+  std::unordered_map<
+      typename std::remove_reference<decltype(std::declval<T>()[std::declval<
+          typename T::value_type>()])>::type,
+      std::size_t>
+      lookup;  // loockup table key: typeof T[] value: corresponding col in tf
 };
-
-/**
- * @brief Get map unique char -> occurrence in string s
- *
- * @param s
- * @return std::unordered_map<char, std::size_t> unique_char -> occurrence
- */
-std::unordered_map<char, std::size_t> AlphabetSize(std::string s);
-
-/**
- * @brief Get bitVector rapresentation of string s
- *
- * @param s string to convert
- * @return utils::WordVector string s rapresented as bitVector
- */
-utils::WordVector StringToBitVector(std::string s);
 
 /**
  * @brief Find occurrences of pattern p in text t
@@ -74,7 +75,7 @@ std::vector<std::size_t> Fsa(std::string t, std::string p);
  * function
  */
 
-TransitionFunction MakeTransitionFunction(std::string p);
+TransitionFunction<std::string> MakeTransitionFunction(std::string p);
 
 /**
  * @brief Find occurrences of pattern p in text t
@@ -109,7 +110,6 @@ std::vector<std::size_t> MakePrefixFunction(std::string p);
 std::vector<std::size_t> Byg(std::string t, std::string p);
 
 }  // namespace pattern
-
 }  // namespace unialgo
 
 #endif  // UNIALGO_STRINGMATCHING_

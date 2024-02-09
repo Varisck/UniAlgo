@@ -3,7 +3,8 @@
 
 #include <stdint.h>  // uint64_t
 
-#include <cmath>  // ceil, floor
+#include <cmath>       // ceil, floor
+#include <functional>  //std::hash
 #include <iostream>
 #include <ostream>      // ostream
 #include <type_traits>  // std::enable_if std::is_arithmetic
@@ -27,6 +28,7 @@ class WordVector {
  public:
   using Type = uint64_t;            // Type used in vector
   using Reference = WordVectorRef;  // reference to bit in vector
+  using value_type = std::size_t;
   static const std::size_t type_size = sizeof(Type) * 8;  // size of Type
 
   /**
@@ -81,9 +83,21 @@ class WordVector {
 
 class WordVectorRef {
  public:
-  WordVectorRef(WordVector::Type& value, std::size_t position,
+  WordVectorRef(WordVector::Type* value, std::size_t position,
                 uint8_t word_size)
       : word_size_(word_size), value_(value), position_(position) {}
+
+  WordVectorRef() : word_size_(0), value_(nullptr), position_(0) {}
+
+  WordVectorRef(const WordVectorRef& ref)
+      : word_size_(ref.word_size_),
+        value_(ref.value_),
+        position_(ref.position_) {}
+
+  WordVectorRef(const WordVectorRef&& ref)
+      : word_size_(std::move(ref.word_size_)),
+        value_(std::move(ref.value_)),
+        position_(std::move(ref.position_)) {}
 
   /**
    * @brief Used to change word value at position_ in the referenced value
@@ -95,7 +109,7 @@ class WordVectorRef {
   template <typename T, typename = typename std::enable_if<
                             std::is_arithmetic<T>::value, T>::type>
   WordVectorRef& operator=(const T& value) {
-    utils::write_bits(&value_, value, position_, word_size_);
+    utils::write_bits(value_, value, position_, word_size_);
     return *this;
   }
 
@@ -105,7 +119,7 @@ class WordVectorRef {
    * @return const WordVector<word_size>::Type
    */
   const WordVector::Type getValue() const {
-    return utils::read_bits(&value_, position_, word_size_);
+    return utils::read_bits(value_, position_, word_size_);
   }
 
   /**
@@ -113,7 +127,7 @@ class WordVectorRef {
    */
   WordVectorRef& operator++() {
     auto value = (*this).getValue();
-    utils::write_bits(&value_, value + 1, position_, word_size_);
+    utils::write_bits(value_, value + 1, position_, word_size_);
     return *this;
   }
 
@@ -133,7 +147,7 @@ class WordVectorRef {
    */
   WordVectorRef& operator--() {
     auto value = (*this).getValue();
-    utils::write_bits(&value_, value - 1, position_, word_size_);
+    utils::write_bits(value_, value - 1, position_, word_size_);
     return *this;
   }
 
@@ -222,13 +236,33 @@ class WordVectorRef {
     return lhs.getValue() <= rhs.getValue();
   }
 
+  /**
+   * @brief Output to the stream the bit rapresentation of referenced value
+   */
+  friend std::ostream& operator<<(std::ostream& os, const WordVectorRef& ref) {
+    auto bitValue = ref.getValue();
+    for (int16_t i = ref.word_size_ - 1; i >= 0; --i)
+      os << static_cast<bool>((bitValue & bit_set[i]));
+    return os;
+  }
+
  private:
   uint8_t word_size_;        // size of a single word to reference
   std::size_t position_;     // position where the referenced word starts
-  WordVector::Type& value_;  // full word containing ref value
+  WordVector::Type* value_;  // full word containing ref value
 };
 
 }  // namespace utils
 }  // namespace unialgo
+
+/**
+ * @brief Hashing function for reference to wordVector
+ */
+template <>
+struct std::hash<unialgo::utils::WordVectorRef> {
+  std::size_t operator()(const unialgo::utils::WordVectorRef& ref) const {
+    return std::hash<unialgo::utils::WordVector::Type>()(ref.getValue());
+  }
+};
 
 #endif  // UNIALGO_UTILS_WORDVECTOR_

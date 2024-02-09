@@ -1,0 +1,45 @@
+#include <gtest/gtest.h>
+
+#include <string>
+#include <vector>
+
+#include "unialgo/pattern/matchingAlgo.hpp"
+
+namespace {
+
+// ========= Testing alphabet =========
+TEST(AlphabetTesting, AlphabetTesting_empty) {
+  unialgo::pattern::Alphabet alph = unialgo::pattern::GetAlphabet("");
+  EXPECT_EQ(alph.size(), 0);
+}
+
+TEST(AlphabetTesting, AlphabetTesting_order) {
+  unialgo::pattern::Alphabet alph = unialgo::pattern::GetAlphabet("acbdeg");
+  EXPECT_EQ(alph.size(), 6);
+  EXPECT_EQ(alph.at('a'), 0);
+  EXPECT_EQ(alph.at('b'), 1);
+  EXPECT_EQ(alph.at('c'), 2);
+  EXPECT_EQ(alph.at('d'), 3);
+  EXPECT_EQ(alph.at('e'), 4);
+  EXPECT_EQ(alph.at('g'), 5);
+}
+
+TEST(FinateStateAutomataTestWV, fsaOnWordVector) {
+  // Test case 1: Pattern occurs multiple times in the text
+  std::string text1 = "abababcabab";
+  std::string pattern1 = "ab";
+
+  auto alphabet = unialgo::pattern::GetAlphabet(text1);
+
+  unialgo::utils::WordVector wvText1 =
+      unialgo::pattern::StringToBitVector(text1, alphabet);
+  unialgo::utils::WordVector wvPattern1 =
+      unialgo::pattern::StringToBitVector(pattern1, alphabet);
+  EXPECT_EQ(wvText1.getWordSize(), 2);
+  EXPECT_EQ(wvPattern1.getWordSize(), 2);
+  std::vector<size_t> result1 = unialgo::pattern::FsaT<>(wvText1, wvPattern1);
+  std::vector<size_t> expected1 = {0, 2, 4, 7, 9};
+  EXPECT_EQ(result1, expected1);
+}
+
+}  // namespace

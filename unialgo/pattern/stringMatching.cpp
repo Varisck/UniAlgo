@@ -1,6 +1,5 @@
 #include "unialgo/pattern/stringMatching.hpp"
 
-#include <cmath>  //std::log, std::ceil
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -8,36 +7,9 @@
 
 namespace unialgo {
 
-std::unordered_map<char, std::size_t> pattern::AlphabetSize(std::string s) {
-  std::unordered_map<char, std::size_t> alphabet;
-  std::size_t unique_chars = 0;
-
-  for (std::size_t i = 0; i < s.size(); ++i) {
-    if (!alphabet.contains(s[i])) {
-      alphabet.emplace(std::make_pair(s[i], unique_chars));
-      ++unique_chars;
-    }
-  }
-  return alphabet;
-}
-
-utils::WordVector pattern::StringToBitVector(std::string s) {
-  std::unordered_map<char, std::size_t> alphabet = pattern::AlphabetSize(s);
-  // compute minimum size bit to represent alphabet
-  const std::size_t wordSize =
-      std::ceil(std::log(alphabet.size()) / std::log(2));
-  // creates wordVector with wordSize = log_2(|Sigma|), size = |s|
-  utils::WordVector wv(s.size(), wordSize);
-
-  for (std::size_t i = 0; i < s.size(); ++i) {
-    wv[i] = alphabet.at(s[i]);
-  }
-
-  return wv;
-}
-
-pattern::TransitionFunction pattern::MakeTransitionFunction(std::string p) {
-  pattern::TransitionFunction transition;
+pattern::TransitionFunction<std::string> pattern::MakeTransitionFunction(
+    std::string p) {
+  pattern::TransitionFunction<std::string> transition;
   size_t unique_char = 0;  // unique characters in pattern
 
   // creates entrys unique_char -> col in tranision function
@@ -62,7 +34,7 @@ pattern::TransitionFunction pattern::MakeTransitionFunction(std::string p) {
 }
 
 std::vector<std::size_t> pattern::Fsa(std::string t, std::string p) {
-  TransitionFunction tf = MakeTransitionFunction(p);
+  TransitionFunction<std::string> tf = MakeTransitionFunction(p);
   std::size_t state = 0;
   std::vector<std::size_t> occurrences;
 

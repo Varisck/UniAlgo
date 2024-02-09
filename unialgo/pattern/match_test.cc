@@ -3,9 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "unialgo/pattern/stringMatching.hpp"
-#include "unialgo/utils/bitvector/bitVectors.hpp"
-
+#include "unialgo/pattern/matchingAlgo.hpp"
 namespace {
 
 TEST(StringWVecConversion, Conversion) {

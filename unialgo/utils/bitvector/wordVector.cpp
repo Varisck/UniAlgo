@@ -19,7 +19,7 @@ std::size_t WordVector::size() const { return num_words_; }
 uint8_t WordVector::getWordSize() const { return word_size_; }
 
 WordVector::Reference WordVector::operator[](std::size_t pos) {
-  return WordVectorRef(bits_[std::floor((pos * word_size_) / type_size)],
+  return WordVectorRef(&bits_[std::floor((pos * word_size_) / type_size)],
                        ((pos * word_size_) % type_size), word_size_);
 }
 
