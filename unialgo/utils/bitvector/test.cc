@@ -60,7 +60,7 @@ TEST(TestBitvector, TestSetBitAndGetBitFunctions) {
   for (int i = 0; i < 128; ++i) EXPECT_EQ(bv[i], 0);
 }
 
-// Testing operator &
+// Testing operator &, &=
 TEST(TestBitvector, BitVectorAndOperator) {
   unialgo::utils::Bitvector bv(100);
 
@@ -86,6 +86,89 @@ TEST(TestBitvector, BitVectorAndOperator) {
   EXPECT_EQ(bv.getNumBits(), res.getNumBits());
   EXPECT_EQ(res[30], 1);
   EXPECT_EQ(res[31], 0);
+
+  bv &= bv2;
+  EXPECT_EQ(bv[30], 1);
+  EXPECT_EQ(bv[31], 0);
+}
+
+// Testing operator >=
+TEST(TestBitvector, BitVectorRightShiftOperator) {
+  unialgo::utils::Bitvector bv(100);
+
+  bv[32] = 1;
+  bv[31] = 1;
+
+  EXPECT_EQ(bv[32], 1);
+  EXPECT_EQ(bv[31], 1);
+  for (int i = 0; i < 31; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 33; i < 128; ++i) EXPECT_EQ(bv[i], 0);
+
+  bv >= 1;
+
+  EXPECT_EQ(bv[31], 1);
+  EXPECT_EQ(bv[30], 1);
+  for (int i = 0; i < 30; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 32; i < 128; ++i) EXPECT_EQ(bv[i], 0);
+}
+
+// Testing operator >=
+TEST(TestBitvector, rightShiftBetweenWords) {
+  unialgo::utils::Bitvector bv(100);
+
+  bv[32] = 1;
+  bv[31] = 1;
+  bv[64] = 1;
+  bv[65] = 1;
+
+  EXPECT_EQ(bv[31], 1);
+  EXPECT_EQ(bv[32], 1);
+  EXPECT_EQ(bv[64], 1);
+  EXPECT_EQ(bv[65], 1);
+  for (int i = 0; i < 31; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 33; i < 64; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 66; i < 128; ++i) EXPECT_EQ(bv[i], 0);
+
+  bv >= 1;
+
+  EXPECT_EQ(bv[30], 1);
+  EXPECT_EQ(bv[31], 1);
+  EXPECT_EQ(bv[63], 1);
+  EXPECT_EQ(bv[64], 1);
+  for (int i = 0; i < 30; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 32; i < 63; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 65; i < 128; ++i) EXPECT_EQ(bv[i], 0);
+}
+
+// Testing operator >=
+TEST(TestBitvector, rightShiftValue) {
+  unialgo::utils::Bitvector bv(100);
+
+  bv[32] = 1;
+  bv[31] = 1;
+  bv[64] = 1;
+  bv[65] = 1;
+  bv[66] = 1;
+
+  EXPECT_EQ(bv[31], 1);
+  EXPECT_EQ(bv[32], 1);
+  EXPECT_EQ(bv[64], 1);
+  EXPECT_EQ(bv[65], 1);
+  EXPECT_EQ(bv[66], 1);
+  for (int i = 0; i < 31; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 33; i < 64; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 67; i < 128; ++i) EXPECT_EQ(bv[i], 0);
+
+  bv >= 2;
+
+  EXPECT_EQ(bv[29], 1);
+  EXPECT_EQ(bv[30], 1);
+  EXPECT_EQ(bv[62], 1);
+  EXPECT_EQ(bv[63], 1);
+  EXPECT_EQ(bv[64], 1);
+  for (int i = 0; i < 29; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 31; i < 62; ++i) EXPECT_EQ(bv[i], 0);
+  for (int i = 65; i < 128; ++i) EXPECT_EQ(bv[i], 0);
 }
 
 // Testing BitvectorReference getValue() function

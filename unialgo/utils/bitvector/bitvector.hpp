@@ -72,7 +72,31 @@ class Bitvector {
    */
   std::size_t getNumBits();
 
+  /**
+   * @brief Bitwise and on bitvector
+   *
+   * @param bv Bitvector
+   * @return Bitvector bitvector with result of bitwise and between this and bv
+   */
   Bitvector operator&(const Bitvector& bv);
+
+  /**
+   * @brief Bitwise and on this bitvector with argument
+   *
+   * @param bv Bitvector to and with
+   * @return this bitvector with bitwise and between this and bv
+   */
+  Bitvector& operator&=(const Bitvector& bv);
+
+  /**
+   * @brief rightl-shift of bitvectors bits
+   *
+   * @param value amount to shift
+   * @return this bitvector right-shifted by value
+   */
+  template <typename T, typename = typename std::enable_if<
+                            std::is_arithmetic<T>::value, T>::type>
+  Bitvector& operator>=(const T value);
 
  private:
   std::vector<Type> bits_;  // vector containing bits
@@ -139,7 +163,6 @@ class BitvectorReference {
     if (static_cast<bool>(value)) {
       value_ |= bit_set[position_];
     } else {
-      // value_ &= !bit_set[position_];
       value_ &= ((all_set << (position_ + 1)) |
                  lower_bits_set[position_]);  // mask 1..10..01..1
     }
@@ -160,8 +183,26 @@ class BitvectorReference {
   std::size_t position_;    // position of bit in word
 };
 
-}  // namespace utils
+// =============== Implementation  ===============
+template <typename T, typename = typename std::enable_if<
+                          std::is_arithmetic<T>::value, T>::type>
+Bitvector& Bitvector::operator>=(const T value) {
+  Bitvector::Type lsbs = 0;
+  Bitvector::Type msbs = 0;
 
+  for (std::size_t i = bits_.size() - 1; i > 0; --i) {
+    lsbs = bits_[i] & lower_bits_set[value];
+    bits_[i] = bits_[i] >> value;
+    bits_[i] = bits_[i] | msbs;
+    msbs = lsbs << (Bitvector::type_size - value);
+  }
+
+  bits_[0] = bits_[0] >> value;
+  bits_[0] = bits_[0] | msbs;
+  return *this;
+}
+
+}  // namespace utils
 }  // namespace unialgo
 
 #endif  // UNIALGO_UTILS_BITVECTOR_
