@@ -5,7 +5,7 @@
  *  \file alignedAlloc.h
  *  @brief Header file defining function aligned_alloc
  *
- *  This file was done due to not having aligned_alloc on windows
+ *  This allows aligned_alloc, aliged_free usage on all systems
  *
  */
 
