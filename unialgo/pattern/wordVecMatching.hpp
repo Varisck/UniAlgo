@@ -3,7 +3,6 @@
 
 #include <unordered_map>
 
-#include "unialgo/pattern/stringMatching.hpp"
 #include "unialgo/utils/bitvector/bitVectors.hpp"
 
 /**
@@ -51,51 +50,6 @@ utils::WordVector StringToBitVector(std::string s);
  * @return utils::WordVector string s rapresented as bitVector
  */
 utils::WordVector StringToBitVector(std::string s, Alphabet alphabet);
-
-template <typename T>
-pattern::TransitionFunction<T> MakeTransitionFunctionT(T& p) {
-  TransitionFunction<T> transition;
-  size_t unique_char = 0;  // unique characters in pattern
-
-  // creates entrys unique_char -> col in tranision function
-  for (size_t i = 0; i < p.size(); ++i) {
-    if (!transition.lookup.contains(p[i])) {
-      transition.lookup.emplace(std::make_pair(p[i], unique_char));
-      ++unique_char;
-    }
-  }
-
-  // creates table of transitino function of size p.size() + 1 * unique_char
-  transition.tf = std::vector<std::vector<std::size_t>>(p.size() + 1);
-  transition.tf[0] = std::vector<std::size_t>(unique_char, 0);
-
-  for (size_t i = 1; i <= p.size(); ++i) {
-    std::size_t k = transition.tf[i - 1][transition.lookup.at(p[i - 1])];
-    transition.tf[i - 1][transition.lookup.at(p[i - 1])] = i;
-    // copy line k to line i
-    transition.tf[i] = transition.tf[k];
-  }
-  return transition;
-}
-
-template <typename T>
-std::vector<std::size_t> FsaT(T& t, T& p) {
-  TransitionFunction<T> tf = MakeTransitionFunctionT(p);
-  std::size_t state = 0;
-  std::vector<std::size_t> occurrences;
-
-  for (std::size_t i = 0; i < t.size(); ++i) {
-    if (tf.lookup.contains(t[i])) {
-      state = tf.tf[state][tf.lookup.at(t[i])];
-    } else {
-      state = 0;
-    }
-    if (state == p.size()) {
-      occurrences.emplace_back(i - p.size() + 1);
-    }
-  }
-  return occurrences;
-}
 
 }  // namespace pattern
 }  // namespace unialgo

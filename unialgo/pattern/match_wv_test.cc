@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <cassert>
 #include <string>
 #include <vector>
 
@@ -37,9 +38,24 @@ TEST(FinateStateAutomataTestWV, fsaOnWordVector) {
       unialgo::pattern::StringToBitVector(pattern1, alphabet);
   EXPECT_EQ(wvText1.getWordSize(), 2);
   EXPECT_EQ(wvPattern1.getWordSize(), 2);
-  std::vector<size_t> result1 = unialgo::pattern::FsaT<>(wvText1, wvPattern1);
+  std::vector<size_t> result1 = unialgo::pattern::Fsa<>(wvText1, wvPattern1);
   std::vector<size_t> expected1 = {0, 2, 4, 7, 9};
   EXPECT_EQ(result1, expected1);
+}
+
+// test case where word_size doesn't match
+TEST(FinateStateAutomataTestWV, checkWordSize) {
+  std::string text1 = "abababcabab";
+  std::string pattern1 = "ab";
+
+  unialgo::utils::WordVector wvText1 =
+      unialgo::pattern::StringToBitVector(text1);
+  unialgo::utils::WordVector wvPattern1 =
+      unialgo::pattern::StringToBitVector(pattern1);
+  EXPECT_EQ(wvText1.getWordSize(), 2);
+  EXPECT_EQ(wvPattern1.getWordSize(), 1);
+  ASSERT_DEATH(unialgo::pattern::Fsa<>(wvText1, wvPattern1),
+               ".*word_size not matching for text and pattern.*");
 }
 
 }  // namespace
