@@ -72,6 +72,8 @@ class Bitvector {
    */
   std::size_t getNumBits();
 
+  Bitvector operator&(const Bitvector& bv);
+
  private:
   std::vector<Type> bits_;  // vector containing bits
   std::size_t num_bits_;    // number of bits in bits_
@@ -137,7 +139,9 @@ class BitvectorReference {
     if (static_cast<bool>(value)) {
       value_ |= bit_set[position_];
     } else {
-      value_ &= !bit_set[position_];
+      // value_ &= !bit_set[position_];
+      value_ &= ((all_set << (position_ + 1)) |
+                 lower_bits_set[position_]);  // mask 1..10..01..1
     }
     return *this;
   }

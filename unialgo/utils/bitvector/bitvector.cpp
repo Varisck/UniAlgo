@@ -2,6 +2,7 @@
 
 #include <stddef.h>  // size_t
 
+#include <cassert>
 #include <cmath>
 #include <iostream>
 
@@ -29,5 +30,14 @@ utils::Bitvector::Reference utils::Bitvector::operator[](std::size_t bit_pos) {
 }
 
 std::size_t utils::Bitvector::getNumBits() { return num_bits_; }
+
+utils::Bitvector utils::Bitvector::operator&(const utils::Bitvector& bv) {
+  assert(bv.bits_.size() == bits_.size() && "bitvector size not matching");
+  utils::Bitvector res(bv.num_bits_);
+  for (std::size_t i = 0; i < res.bits_.size(); ++i) {
+    res.bits_[i] = bits_[i] & bv.bits_[i];
+  }
+  return res;
+}
 
 }  // namespace unialgo

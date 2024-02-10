@@ -60,6 +60,34 @@ TEST(TestBitvector, TestSetBitAndGetBitFunctions) {
   for (int i = 0; i < 128; ++i) EXPECT_EQ(bv[i], 0);
 }
 
+// Testing operator &
+TEST(TestBitvector, BitVectorAndOperator) {
+  unialgo::utils::Bitvector bv(100);
+
+  bv[64] = 1;
+  EXPECT_EQ(bv[64], 1);
+
+  bv[30] = 1;
+  bv[31] = 1;
+  bv[32] = 0;
+  EXPECT_EQ(bv[30], 1);
+  EXPECT_EQ(bv[31], 1);
+  EXPECT_EQ(bv[32], 0);
+
+  unialgo::utils::Bitvector bv2(100);
+  bv2[30] = 1;
+  bv2[31] = 0;
+  bv2[32] = 0;
+  EXPECT_EQ(bv2[30], 1);
+  EXPECT_EQ(bv2[31], 0);
+  EXPECT_EQ(bv2[32], 0);
+
+  unialgo::utils::Bitvector res = bv & bv2;
+  EXPECT_EQ(bv.getNumBits(), res.getNumBits());
+  EXPECT_EQ(res[30], 1);
+  EXPECT_EQ(res[31], 0);
+}
+
 // Testing BitvectorReference getValue() function
 TEST(TestBitvectorReference, TestGetValue) {
   unialgo::utils::Bitvector bv(10);
