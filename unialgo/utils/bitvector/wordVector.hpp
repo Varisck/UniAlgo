@@ -27,10 +27,14 @@ class WordVectorRef;
  */
 class WordVector {
  public:
-  using Type = uint64_t;                  // Type used in vector
-  using Reference = WordVectorRef<Type>;  // reference to bit in vector
+  using Type = uint64_t;                    // Type used in vector
+  using reference_type = Type;              // type of class WordVectorRef
+  using const_reference_type = const Type;  // type of const class WordVectorRef
+  using Reference =
+      WordVectorRef<reference_type>;  // reference to bit in vector
   using ConstReference =
-      const WordVectorRef<const Type>;  // const reference to bit in vector
+      const WordVectorRef<const_reference_type>;  // const reference to bit in
+                                                  // vector
   using value_type = std::size_t;
   static const std::size_t type_size = sizeof(Type) * 8;  // size of Type
 
