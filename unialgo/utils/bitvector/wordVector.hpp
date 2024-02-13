@@ -18,6 +18,7 @@ namespace unialgo {
 namespace utils {
 
 // forward decleration
+template <typename T>
 class WordVectorRef;
 
 /**
@@ -26,8 +27,10 @@ class WordVectorRef;
  */
 class WordVector {
  public:
-  using Type = uint64_t;            // Type used in vector
-  using Reference = WordVectorRef;  // reference to bit in vector
+  using Type = uint64_t;                  // Type used in vector
+  using Reference = WordVectorRef<Type>;  // reference to bit in vector
+  using ConstReference =
+      const WordVectorRef<const Type>;  // const reference to bit in vector
   using value_type = std::size_t;
   static const std::size_t type_size = sizeof(Type) * 8;  // size of Type
 
@@ -53,6 +56,14 @@ class WordVector {
    * @return Reference to word at position pos in WordVector
    */
   Reference operator[](std::size_t pos);
+
+  /**
+   * @brief Accessing word in WordVector
+   *
+   * @param pos position of word to access
+   * @return Reference to word at position pos in WordVector
+   */
+  ConstReference operator[](std::size_t pos) const;
 
   /**
    * @brief Get the number of bits in vector (num_words_ * word_size_)
@@ -81,10 +92,11 @@ class WordVector {
   std::size_t num_words_;   // number of words in bits_
 };
 
+// template on type may solve the issue (????)
+template <typename RT>
 class WordVectorRef {
  public:
-  WordVectorRef(WordVector::Type* value, std::size_t position,
-                uint8_t word_size)
+  WordVectorRef(RT* value, std::size_t position, uint8_t word_size)
       : word_size_(word_size), value_(value), position_(position) {}
 
   WordVectorRef() : word_size_(0), value_(nullptr), position_(0) {}
@@ -108,7 +120,7 @@ class WordVectorRef {
    */
   template <typename T, typename = typename std::enable_if<
                             std::is_arithmetic<T>::value, T>::type>
-  WordVectorRef& operator=(const T& value) {
+  WordVectorRef<RT>& operator=(const T& value) {
     utils::write_bits(value_, value, position_, word_size_);
     return *this;
   }
@@ -118,7 +130,7 @@ class WordVectorRef {
    *
    * @return const WordVector<word_size>::Type
    */
-  const WordVector::Type getValue() const {
+  const RT getValue() const {
     return utils::read_bits(value_, position_, word_size_);
   }
 
@@ -136,7 +148,7 @@ class WordVectorRef {
    *
    * @return const WordVector<word_size>::Type value before increment
    */
-  const WordVector::Type operator++(int) {
+  const RT operator++(int) {
     auto value = (*this).getValue();
     ++(*this);
     return value;
@@ -156,7 +168,7 @@ class WordVectorRef {
    *
    * @return const WordVector<word_size>::Type value before decrement
    */
-  const WordVector::Type operator--(int) {
+  const RT operator--(int) {
     auto value = (*this).getValue();
     --(*this);
     return value;
@@ -247,10 +259,12 @@ class WordVectorRef {
   }
 
  private:
-  uint8_t word_size_;        // size of a single word to reference
-  std::size_t position_;     // position where the referenced word starts
-  WordVector::Type* value_;  // full word containing ref value
+  const uint8_t word_size_;     // size of a single word to reference
+  const std::size_t position_;  // position where the referenced word starts
+  RT* value_;                   // full word containing ref value
 };
+
+using WordVectorReference = WordVector::Reference;
 
 }  // namespace utils
 }  // namespace unialgo
@@ -258,10 +272,10 @@ class WordVectorRef {
 /**
  * @brief Hashing function for reference to wordVector
  */
-template <>
-struct std::hash<unialgo::utils::WordVectorRef> {
-  std::size_t operator()(const unialgo::utils::WordVectorRef& ref) const {
-    return std::hash<unialgo::utils::WordVector::Type>()(ref.getValue());
+template <typename T>
+struct std::hash<typename unialgo::utils::WordVectorRef<T>> {
+  std::size_t operator()(const unialgo::utils::WordVectorRef<T>& ref) const {
+    return std::hash<T>()(ref.getValue());
   }
 };
 

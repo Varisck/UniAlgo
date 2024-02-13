@@ -349,7 +349,7 @@ TEST(TestingWordVector, ostreamWvRef) {
   EXPECT_EQ(oss.str(), "00011011");
 }
 
-// testing ostream on reference
+// testing hasing funciton on reference
 TEST(TestingWordVector, hashFunction) {
   unialgo::utils::WordVector wv(10);
 
@@ -364,16 +364,39 @@ TEST(TestingWordVector, hashFunction) {
   EXPECT_EQ(wv[3], 3);
   for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
 
-  EXPECT_EQ(std::hash<unialgo::utils::WordVectorRef>{}(wv[0]),
-            std::hash<unialgo::utils::WordVectorRef>{}(wv[0]));
-  EXPECT_EQ(std::hash<unialgo::utils::WordVectorRef>{}(wv[0]),
-            std::hash<unialgo::utils::WordVectorRef>{}(wv[1]));
-  EXPECT_NE(std::hash<unialgo::utils::WordVectorRef>{}(wv[0]),
-            std::hash<unialgo::utils::WordVectorRef>{}(wv[2]));
-  EXPECT_NE(std::hash<unialgo::utils::WordVectorRef>{}(wv[0]),
-            std::hash<unialgo::utils::WordVectorRef>{}(wv[3]));
-  EXPECT_NE(std::hash<unialgo::utils::WordVectorRef>{}(wv[3]),
-            std::hash<unialgo::utils::WordVectorRef>{}(wv[2]));
+  EXPECT_EQ(std::hash<unialgo::utils::WordVectorReference>{}(wv[0]),
+            std::hash<unialgo::utils::WordVectorReference>{}(wv[0]));
+  EXPECT_EQ(std::hash<unialgo::utils::WordVectorReference>{}(wv[0]),
+            std::hash<unialgo::utils::WordVectorReference>{}(wv[1]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorReference>{}(wv[0]),
+            std::hash<unialgo::utils::WordVectorReference>{}(wv[2]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorReference>{}(wv[0]),
+            std::hash<unialgo::utils::WordVectorReference>{}(wv[3]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorReference>{}(wv[3]),
+            std::hash<unialgo::utils::WordVectorReference>{}(wv[2]));
+}
+
+// testing const reference
+TEST(TestingWordVector, constReference) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 0;
+  wv[2] = 2;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 0);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+  const unialgo::utils::WordVector constWv(wv);
+  EXPECT_EQ(constWv[0], 0);
+  EXPECT_EQ(constWv[1], 0);
+  EXPECT_EQ(constWv[2], 2);
+  EXPECT_EQ(constWv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(constWv[i], 0);
 }
 
 }  // namespace
