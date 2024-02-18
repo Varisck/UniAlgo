@@ -399,4 +399,38 @@ TEST(TestingWordVector, constReference) {
   for (int i = 4; i < 10; ++i) EXPECT_EQ(constWv[i], 0);
 }
 
+// testing hasing funciton on ConstReference
+TEST(TestingWordVector, hashFunctionConstReference) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 0;
+  wv[2] = 2;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 0);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+  const unialgo::utils::WordVector constWv(wv);
+  EXPECT_EQ(constWv[0], 0);
+  EXPECT_EQ(constWv[1], 0);
+  EXPECT_EQ(constWv[2], 2);
+  EXPECT_EQ(constWv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(constWv[i], 0);
+
+  EXPECT_EQ(std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]),
+            std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]));
+  EXPECT_EQ(std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]),
+            std::hash<unialgo::utils::WordVectorReference>{}(constWv[1]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]),
+            std::hash<unialgo::utils::WordVectorReference>{}(constWv[2]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]),
+            std::hash<unialgo::utils::WordVectorReference>{}(constWv[3]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorReference>{}(constWv[3]),
+            std::hash<unialgo::utils::WordVectorReference>{}(constWv[2]));
+}
+
 }  // namespace

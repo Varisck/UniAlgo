@@ -14,12 +14,14 @@
  * @brief Implementation of pattern matching with std::string
  * \file stringMatching.hpp
  *
- * this file contains definition of exact string matching functions on
- * std::string
+ * this file contains definition of exact string matching functions
  *
  * all the string matching algo are in the unialgo::pattern namespace
  *
- * Fsa, Kmp, Byg
+ * Algo:
+ * - Fsa: works on cointainer-like objects such as std::string, std::vector,
+ * unialgo::util::wordVectors, arrays.
+ * - Kmp, Byg
  */
 
 namespace unialgo {
@@ -57,7 +59,7 @@ struct TransitionFunction {
  * @return TransitionFuction transition function to run fsa with pattern
  */
 template <typename T = std::string>
-TransitionFunction<T> MakeTransitionFunction(T& p);
+TransitionFunction<T> MakeTransitionFunction(const T& p);
 
 /**
  * @brief Find occurrences of pattern p in text t using precalculated transition
@@ -78,7 +80,8 @@ TransitionFunction<T> MakeTransitionFunction(T& p);
  * @return std::vector<std::size_t> vector containing occurrences
  */
 template <typename T = std::string>
-std::vector<std::size_t> Fsa(T& t, T& p, TransitionFunction<T>& tf);
+std::vector<std::size_t> Fsa(const T& t, const T& p,
+                             const TransitionFunction<T>& tf);
 
 /**
  * @brief Find occurrences of pattern p in text t
@@ -97,7 +100,7 @@ std::vector<std::size_t> Fsa(T& t, T& p, TransitionFunction<T>& tf);
  * @return std::vector<std::size_t> vector containing occurrences
  */
 template <typename T = std::string>
-std::vector<std::size_t> Fsa(T& t, T& p);
+std::vector<std::size_t> Fsa(const T& t, const T& p);
 
 /**
  * @brief Find occurrences of pattern p in text t
@@ -129,12 +132,13 @@ std::vector<std::size_t> MakePrefixFunction(std::string p);
  * @param p pattern
  * @return std::vector<std::size_t> vector containing occurrences
  */
-std::vector<std::size_t> Byg(std::string t, std::string p);
+template <typename T = std::string>
+std::vector<std::size_t> Byg(T& t, T& p);
 
 // =============== Implementation ===============
 
 template <typename T = std::string>
-TransitionFunction<T> MakeTransitionFunction(T& p) {
+TransitionFunction<T> MakeTransitionFunction(const T& p) {
   TransitionFunction<T> transition;
   size_t unique_char = 0;  // unique characters in pattern
 
@@ -160,7 +164,14 @@ TransitionFunction<T> MakeTransitionFunction(T& p) {
 }
 
 template <typename T = std::string>
-std::vector<std::size_t> Fsa(T& t, T& p, TransitionFunction<T>& tf) {
+std::vector<std::size_t> Fsa(const T& t, const T& p,
+                             const TransitionFunction<T>& tf) {
+  // check size of words in case template resolve to WordVector
+  if constexpr (std::is_same_v<T, unialgo::utils::WordVector>) {
+    assert(t.getWordSize() == p.getWordSize() &&
+           "word_size not matching for text and pattern");
+  }
+
   std::size_t state = 0;
   std::vector<std::size_t> occurrences;
 
@@ -178,32 +189,9 @@ std::vector<std::size_t> Fsa(T& t, T& p, TransitionFunction<T>& tf) {
 }
 
 template <typename T = std::string>
-std::vector<std::size_t> Fsa(T& t, T& p) {
+std::vector<std::size_t> Fsa(const T& t, const T& p) {
   TransitionFunction<T> tf = MakeTransitionFunction(p);
   return Fsa<T>(t, p, tf);
-}
-
-// if type is wordvector make sure that pattern and text wordSize is matching
-template <>
-inline std::vector<std::size_t> Fsa<unialgo::utils::WordVector>(
-    unialgo::utils::WordVector& t, unialgo::utils::WordVector& p,
-    TransitionFunction<unialgo::utils::WordVector>& tf) {
-  assert(t.getWordSize() == p.getWordSize() &&
-         "word_size not matching for text and pattern");
-  std::size_t state = 0;
-  std::vector<std::size_t> occurrences;
-
-  for (std::size_t i = 0; i < t.size(); ++i) {
-    if (tf.lookup.contains(t[i])) {
-      state = tf.tf[state][tf.lookup.at(t[i])];
-    } else {
-      state = 0;
-    }
-    if (state == p.size()) {
-      occurrences.emplace_back(i - p.size() + 1);
-    }
-  }
-  return occurrences;
 }
 
 }  // namespace pattern
