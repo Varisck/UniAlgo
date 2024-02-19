@@ -101,6 +101,13 @@ class WordVector {
    */
   uint8_t getWordSize() const;
 
+  /**
+   * @brief Output to the steam bits inside wordvector from left to right
+   * (101....) wv[size]wv[size-1]...wv[0]
+   *
+   */
+  friend std::ostream& operator<<(std::ostream& os, const WordVector& wv);
+
  private:
   std::vector<Type> bits_;  // vector of bits
   uint8_t word_size_;       // size of a single word to store

@@ -365,6 +365,26 @@ TEST(TestingWordVector, ostreamWvRef) {
   EXPECT_EQ(oss.str(), "00011011");
 }
 
+// testing ostream on wordvector
+TEST(TestingWordVector, ostreamWv) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+  std::ostringstream oss;
+  oss << wv;
+  EXPECT_EQ(oss.str(), "00000000000011100100");
+}
+
 // testing hasing funciton on reference
 TEST(TestingWordVector, hashFunction) {
   unialgo::utils::WordVector wv(10);

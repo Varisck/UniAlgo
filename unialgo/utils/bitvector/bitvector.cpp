@@ -59,7 +59,8 @@ Bitvector& Bitvector::operator&=(const Bitvector& bv) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Bitvector& bv) {
-  for (int64_t i = bv.size() - 1; i >= 0; --i) os << bv[i];
+  for (std::size_t i = bv.size() - 1; i > 0; --i) os << bv[i];
+  os << bv[0];
   return os;
 }
 

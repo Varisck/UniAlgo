@@ -28,5 +28,11 @@ WordVector::ConstReference WordVector::operator[](std::size_t pos) const {
                        ((pos * word_size_) % type_size), word_size_);
 }
 
+std::ostream& operator<<(std::ostream& os, const WordVector& wv) {
+  for (std::size_t i = wv.size() - 1; i > 0; --i) os << wv[i];
+  os << wv[0];
+  return os;
+}
+
 }  // namespace utils
 }  // namespace unialgo
