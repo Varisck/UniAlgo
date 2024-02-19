@@ -26,7 +26,12 @@ bool Bitvector::GetBit(std::size_t bit_pos) const {
 }
 
 Bitvector::Reference Bitvector::operator[](std::size_t bit_pos) {
-  return BitvectorReference(bits_[std::floor(bit_pos / type_size)],
+  return BitvectorReference(&bits_[std::floor(bit_pos / type_size)],
+                            (bit_pos % type_size));
+}
+
+Bitvector::ConstReference Bitvector::operator[](std::size_t bit_pos) const {
+  return BitvectorReference(&bits_[std::floor(bit_pos / type_size)],
                             (bit_pos % type_size));
 }
 
@@ -51,6 +56,11 @@ Bitvector& Bitvector::operator&=(const Bitvector& bv) {
     bits_[i] = bits_[i] & bv.bits_[i];
   }
   return *this;
+}
+
+std::ostream& operator<<(std::ostream& os, const Bitvector& bv) {
+  for (int64_t i = bv.size() - 1; i >= 0; --i) os << bv[i];
+  return os;
 }
 
 }  // namespace utils

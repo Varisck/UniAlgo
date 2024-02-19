@@ -28,6 +28,7 @@ class Bitvector {
  public:
   using Type = uint64_t;                                  // type used in vector
   using Reference = BitvectorReference;                   // reference to bit
+  using ConstReference = const BitvectorReference;        // const ref to bit
   static const std::size_t type_size = sizeof(Type) * 8;  // size of Type in bit
 
   /**
@@ -54,6 +55,14 @@ class Bitvector {
    * @return Reference to bit at position bit_pos
    */
   Reference operator[](std::size_t bit_pos);
+
+  /**
+   * @brief Accessing bit in Bitvector
+   *
+   * @param bit_pos position of bit to access
+   * @return Reference to bit at position bit_pos
+   */
+  ConstReference operator[](std::size_t bit_pos) const;
 
   /**
    * @brief Set bit in Bitvector
@@ -111,15 +120,11 @@ class Bitvector {
   Bitvector& operator>=(const T value);
 
   /**
-   * @brief Output to the steam bits inside bv (101....)
+   * @brief Output to the steam bits inside bv from left to right (101....)
    * bv[size]bv[size-1]...bv[0]
    *
    */
-  // friend std::ostream& operator<<(std::ostream& os, const Bitvector& bv) {
-  //   for (int64_t i = bv.size() - 1; i >= 0; ++i) os << bv[i];
-  //   os << std::endl;
-  //   return os;
-  // }
+  friend std::ostream& operator<<(std::ostream& os, const Bitvector& bv);
 
  private:
   std::vector<Type> bits_;  // vector containing bits
@@ -139,15 +144,26 @@ class BitvectorReference {
    * @param value reference to word in Bitvector
    * @param position position of the bit referenced
    */
-  BitvectorReference(Bitvector::Type& value, std::size_t position)
-      : value_(value), position_(position) {}
+  BitvectorReference(Bitvector::Type* value, std::size_t position)
+      : value_(value), position_(position), kValue_(*value) {}
+
+  /**
+   * @brief Construct a const BitVectorReference object
+   *
+   * @param value const reference to word in Bitvector
+   * @param position position of the bit referenced
+   */
+  BitvectorReference(const Bitvector::Type* value, std::size_t position)
+      : value_(nullptr), position_(position), kValue_(*value) {}
 
   ~BitvectorReference() { position_ = 0; }
 
   /**
    * @brief Get the bit value of referenced bit in Bitvector
    */
-  bool getValue() { return static_cast<bool>((value_ & bit_set[position_])); }
+  bool getValue() const {
+    return static_cast<bool>((kValue_ & bit_set[position_]));
+  }
 
   /**
    * @brief Comparison operator between BitvectorReference and arithmetic type
@@ -158,8 +174,7 @@ class BitvectorReference {
   template <typename T, typename = typename std::enable_if<
                             std::is_arithmetic<T>::value, T>::type>
   friend inline bool operator==(const BitvectorReference& lhs, const T& value) {
-    return static_cast<bool>((lhs.value_ & bit_set[lhs.position_])) ==
-           static_cast<bool>(value);
+    return lhs.getValue() == static_cast<bool>(value);
   }
 
   /**
@@ -169,8 +184,7 @@ class BitvectorReference {
    */
   friend inline bool operator==(const BitvectorReference& lhs,
                                 const BitvectorReference& rhs) {
-    return static_cast<bool>((lhs.value_ & bit_set[lhs.position_])) ==
-           static_cast<bool>((rhs.value_ & bit_set[rhs.position_]));
+    return lhs.getValue() == rhs.getValue();
   }
 
   /**
@@ -184,10 +198,10 @@ class BitvectorReference {
                             std::is_arithmetic<T>::value, T>::type>
   BitvectorReference& operator=(const T& value) {
     if (static_cast<bool>(value)) {
-      value_ |= bit_set[position_];
+      *value_ |= bit_set[position_];
     } else {
-      value_ &= ((all_set << (position_ + 1)) |
-                 lower_bits_set[position_]);  // mask 1..10..01..1
+      *value_ &= ((all_set << (position_ + 1)) |
+                  lower_bits_set[position_]);  // mask 1..10..01..1
     }
     return *this;
   }
@@ -197,13 +211,14 @@ class BitvectorReference {
    */
   friend std::ostream& operator<<(std::ostream& os,
                                   const BitvectorReference& bv_ref) {
-    os << static_cast<bool>((bv_ref.value_ & bit_set[bv_ref.position_]));
+    os << static_cast<bool>(bv_ref.getValue());
     return os;
   }
 
  private:
-  Bitvector::Type& value_;  // word referenced in Bitvector
-  std::size_t position_;    // position of bit in word
+  const Bitvector::Type kValue_;  // const value for constRef
+  Bitvector::Type* value_;        // pointer to word referenced in Bitvector
+  std::size_t position_;          // position of bit in word
 };
 
 // =============== Implementation  ===============

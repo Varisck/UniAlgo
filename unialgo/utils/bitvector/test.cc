@@ -196,6 +196,22 @@ TEST(TestBitvectorReference, TestCompOperator) {
   EXPECT_EQ(bv[0] == bv[1], 1);
 }
 
+// testing ostream on reference
+TEST(TestBitvector, ostream) {
+  unialgo::utils::Bitvector bv(10);
+
+  bv[9] = 1;
+  bv[8] = 1;
+
+  EXPECT_EQ(bv[9], 1);
+  EXPECT_EQ(bv[8], 1);
+  for (int i = 0; i < 8; ++i) EXPECT_EQ(bv[i], 0);
+
+  std::ostringstream oss;
+  oss << bv;
+  EXPECT_EQ(oss.str(), "1100000000");
+}
+
 // ============ Testing WordVector ============
 
 // Testing getters
