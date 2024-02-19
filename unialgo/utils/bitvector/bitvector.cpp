@@ -21,7 +21,7 @@ void Bitvector::SetBit(std::size_t bit_pos) {
   bits_[std::floor(bit_pos / type_size)] |= bit_set[bit_pos % type_size];
 }
 
-bool Bitvector::GetBit(std::size_t bit_pos) {
+bool Bitvector::GetBit(std::size_t bit_pos) const {
   return bits_[std::floor(bit_pos / type_size)] & bit_set[bit_pos % type_size];
 }
 
@@ -30,10 +30,13 @@ Bitvector::Reference Bitvector::operator[](std::size_t bit_pos) {
                             (bit_pos % type_size));
 }
 
-std::size_t Bitvector::getNumBits() { return num_bits_; }
+std::size_t Bitvector::getNumBits() const { return num_bits_; }
+
+std::size_t Bitvector::size() const { return num_bits_; }
 
 Bitvector Bitvector::operator&(const Bitvector& bv) {
-  assert(bv.bits_.size() == bits_.size() && "bitvector size not matching");
+  // assert(bv.bits_.size() == bits_.size() && "bitvector size not matching");
+  assert(bv.getNumBits() == num_bits_ && "bitvector size not matching");
   Bitvector res(bv.num_bits_);
   for (std::size_t i = 0; i < res.bits_.size(); ++i) {
     res.bits_[i] = bits_[i] & bv.bits_[i];
@@ -42,7 +45,8 @@ Bitvector Bitvector::operator&(const Bitvector& bv) {
 }
 
 Bitvector& Bitvector::operator&=(const Bitvector& bv) {
-  assert(bv.bits_.size() == bits_.size() && "bitvector size not matching");
+  // assert(bv.bits_.size() == bits_.size() && "bitvector size not matching");
+  assert(bv.getNumBits() == num_bits_ && "bitvector size not matching");
   for (std::size_t i = 0; i < bits_.size(); ++i) {
     bits_[i] = bits_[i] & bv.bits_[i];
   }

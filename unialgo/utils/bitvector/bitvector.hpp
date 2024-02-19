@@ -38,6 +38,11 @@ class Bitvector {
   Bitvector(std::size_t num_bits);
 
   /**
+   * @brief Construct a new Bitvector object
+   */
+  Bitvector() : num_bits_(0), bits_(0) {}
+
+  /**
    * @brief Destroy the Bitvector object
    */
   ~Bitvector();
@@ -63,14 +68,21 @@ class Bitvector {
    * @param bit_pos position of bit to access
    * @return bool value of bit at bit_pos
    */
-  bool GetBit(std::size_t bit_pos);
+  bool GetBit(std::size_t bit_pos) const;
 
   /**
    * @brief Gettter for num_bits_
    *
    * @return std::size_t num_bits_ inside Bitvector
    */
-  std::size_t getNumBits();
+  std::size_t getNumBits() const;
+
+  /**
+   * @brief Get size of Bitvector = num_bits
+   *
+   * @return std::size_t number of bits in bitvector
+   */
+  std::size_t size() const;
 
   /**
    * @brief Bitwise and on bitvector
@@ -97,6 +109,17 @@ class Bitvector {
   template <typename T, typename = typename std::enable_if<
                             std::is_arithmetic<T>::value, T>::type>
   Bitvector& operator>=(const T value);
+
+  /**
+   * @brief Output to the steam bits inside bv (101....)
+   * bv[size]bv[size-1]...bv[0]
+   *
+   */
+  // friend std::ostream& operator<<(std::ostream& os, const Bitvector& bv) {
+  //   for (int64_t i = bv.size() - 1; i >= 0; ++i) os << bv[i];
+  //   os << std::endl;
+  //   return os;
+  // }
 
  private:
   std::vector<Type> bits_;  // vector containing bits

@@ -2,6 +2,7 @@
 #define UNIALGO_PATTERN_WORDVECMATCHING_
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include "unialgo/utils/bitvector/bitVectors.hpp"
 
@@ -26,11 +27,19 @@ namespace pattern {
 using Alphabet = std::unordered_map<char, uint8_t>;
 
 /**
- * @brief Get the map of alphabet
+ * @brief Return set with unique chars in s
  *
  * @param s string
- * @return std::unordered_map<char, uint8_t> map with unique char -> position in
- * alphabet order
+ * @return std::unordered_set<char> unique chars in s
+ */
+std::unordered_set<char> GetUniqueChars(std::string s);
+
+/**
+ * @brief Get the alphabet of s, unique chars associated with alphabetical order
+ *
+ * @param s string
+ * @return std::unordered_map<char, uint8_t> map with unique char ->
+ * position in alphabet order
  */
 Alphabet GetAlphabet(std::string s);
 

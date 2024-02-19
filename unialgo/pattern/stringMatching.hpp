@@ -128,6 +128,10 @@ std::vector<std::size_t> MakePrefixFunction(std::string p);
  *
  * @details this function implements the BYG algorithm
  *
+ * Time Complexity: O(n) + O(m + |Sigma|) where:
+ *    m + |Sigma| construct the table
+ *    n serach
+ *
  * @param t text
  * @param p pattern
  * @return std::vector<std::size_t> vector containing occurrences
@@ -192,6 +196,45 @@ template <typename T = std::string>
 std::vector<std::size_t> Fsa(const T& t, const T& p) {
   TransitionFunction<T> tf = MakeTransitionFunction(p);
   return Fsa<T>(t, p, tf);
+}
+
+template <typename T = std::string>
+std::vector<std::size_t> Byg(T& t, T& p) {
+  // construct Byg tamble (sigma -> word with occurrences of sigma in p)
+
+  std::unordered_map<
+      typename std::remove_reference<decltype(std::declval<T>()[std::declval<
+          typename T::value_type>()])>::type,
+      unialgo::utils::Bitvector>
+      table;
+  for (std::size_t i = 0; i < p.size(); ++i) {
+    if (!table.contains(p[i])) {
+      table.emplace(std::make_pair(p[i], unialgo::utils::Bitvector(p.size())));
+    }
+  }
+  // set the bit in the bitvector corresponding to the occurence of sigma in p
+  for (std::size_t i = 0; i < p.size(); ++i) {
+    table[p[i]][p.size() - i - 1] = 1;
+  }
+
+  // search
+  std::vector<std::size_t> occ;
+  unialgo::utils::Bitvector bv(p.size());
+  unialgo::utils::Bitvector zeros(p.size());
+  for (std::size_t i = 0; i < t.size(); ++i) {
+    auto sigma = t[i];
+    if (table.contains(sigma)) {
+      // bv = RSHIFT1(bv) and table[sigma]:
+      bv >= 1;
+      bv[p.size() - 1] = 1;
+      bv &= table[sigma];
+      if (bv[0] == 1) occ.push_back(i - p.size() + 1);
+
+    } else {
+      bv &= zeros;
+    }
+  }
+  return occ;
 }
 
 }  // namespace pattern

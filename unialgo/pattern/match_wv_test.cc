@@ -25,6 +25,16 @@ TEST(AlphabetTesting, AlphabetTesting_order) {
   EXPECT_EQ(alph.at('g'), 5);
 }
 
+TEST(AlphabetTesting, getUniqueChars) {
+  auto uniques = unialgo::pattern::GetUniqueChars("abcdeaaeedd");
+  EXPECT_TRUE(uniques.contains('a'));
+  EXPECT_TRUE(uniques.contains('b'));
+  EXPECT_TRUE(uniques.contains('c'));
+  EXPECT_TRUE(uniques.contains('d'));
+  EXPECT_TRUE(uniques.contains('e'));
+  EXPECT_TRUE(!uniques.contains('f'));
+}
+
 TEST(FinateStateAutomataTestWV, fsaOnWordVector) {
   // Test case 1: Pattern occurs multiple times in the text
   std::string text1 = "abababcabab";

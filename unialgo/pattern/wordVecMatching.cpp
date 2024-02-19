@@ -3,10 +3,17 @@
 #include <cmath>  //std::log, std::ceil
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace unialgo {
 namespace pattern {
+
+std::unordered_set<char> GetUniqueChars(std::string s) {
+  std::unordered_set<char> uniques;
+  for (char c : s) uniques.insert(c);
+  return uniques;
+}
 
 // not the most efficient implementation but generaly small alphabet
 Alphabet GetAlphabet(std::string s) {
@@ -23,7 +30,7 @@ Alphabet GetAlphabet(std::string s) {
     alph.emplace_back(pair.first);
   }
   std::sort(alph.begin(), alph.end());
-  // give value in alphabetical order at chars in alphabet
+  // give chars in alphabet corresponding value in alphabetical order
   for (uint8_t i = 0; i < alph.size(); ++i) {
     alphabet[alph[i]] = i;
   }

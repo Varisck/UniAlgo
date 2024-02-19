@@ -7,7 +7,7 @@
 #include <functional>  //std::hash
 #include <iostream>
 #include <ostream>      // ostream
-#include <type_traits>  // std::enable_if std::is_arithmetic
+#include <type_traits>  // std::enable_if, std::is_arithmetic
 #include <vector>
 
 #include "unialgo/utils/bitvector/bitMaps.hpp"
