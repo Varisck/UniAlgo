@@ -37,8 +37,7 @@ Alphabet GetAlphabet(std::string s) {
   return alphabet;
 }
 
-utils::WordVector StringToBitVector(std::string s) {
-  Alphabet alphabet = GetAlphabet(s);
+utils::WordVector StringToBitVector(std::string s, Alphabet alphabet) {
   // compute minimum size bit to represent alphabet
   const std::size_t wordSize =
       std::ceil(std::log(alphabet.size()) / std::log(2));
@@ -52,18 +51,9 @@ utils::WordVector StringToBitVector(std::string s) {
   return wv;
 }
 
-utils::WordVector StringToBitVector(std::string s, Alphabet alphabet) {
-  // compute minimum size bit to represent alphabet
-  const std::size_t wordSize =
-      std::ceil(std::log(alphabet.size()) / std::log(2));
-  // creates wordVector with wordSize = log_2(|Sigma|), size = |s|
-  utils::WordVector wv(s.size(), wordSize);
-
-  for (std::size_t i = 0; i < s.size(); ++i) {
-    wv[i] = alphabet.at(s[i]);
-  }
-
-  return wv;
+utils::WordVector StringToBitVector(std::string s) {
+  Alphabet alphabet = GetAlphabet(s);
+  return StringToBitVector(s, alphabet);
 }
 
 }  // namespace pattern

@@ -14,14 +14,14 @@
  * @brief Implementation of pattern matching with std::string
  * \file stringMatching.hpp
  *
- * this file contains definition of exact string matching functions
+ * this file contains definition of string matching algorithms
  *
  * all the string matching algo are in the unialgo::pattern namespace
  *
  * Algo:
- * - Fsa: works on cointainer-like objects such as std::string, std::vector,
- * unialgo::util::wordVectors, arrays.
- * - Kmp, Byg
+ * - Fsa, Byg: works on cointainer-like objects such as std::string,
+ * std::vector, unialgo::util::wordVectors, arrays.
+ * - Kmp
  */
 
 namespace unialgo {
