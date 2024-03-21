@@ -4,6 +4,7 @@
 #include <stdint.h>  // uint64_t
 
 #include <iostream>
+#include <iterator>     // std::forward_iterator_tag;
 #include <ostream>      // ostream
 #include <type_traits>  // std::enable_if std::is_arithmetic
 #include <vector>
@@ -125,6 +126,61 @@ class Bitvector {
    *
    */
   friend std::ostream& operator<<(std::ostream& os, const Bitvector& bv);
+
+  /**
+   * @brief Generic Iterator implementation
+   *
+   * @tparam Ref_iterator type iterating on
+   * @tparam Bitvector_pointer pointer to bitvector referenced
+   */
+  template <typename Ref_iterator, typename Bitvector_pointer>
+  class TempIterator {
+   public:
+    using iterator_category = std::forward_iterator_tag;
+    // using difference_type = std::ptrdiff_t;
+    using difference_type = long;
+    using value_type = Ref_iterator;
+    using pointer = Ref_iterator*;
+    using reference = Ref_iterator;
+
+    TempIterator(std::size_t bit_pos, Bitvector_pointer bv)
+        : bit_pos_(bit_pos), bv_(bv) {}
+
+    reference operator*() const { return (*bv_)[bit_pos_]; }
+    pointer operator->() { return &((*bv_)[bit_pos_]); }
+
+    TempIterator& operator++() {
+      bit_pos_++;
+      return *this;
+    }
+
+    TempIterator operator++(int) {
+      TempIterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    friend bool operator==(const TempIterator& a, const TempIterator& b) {
+      return a.bv_ == b.bv_ && a.bit_pos_ == b.bit_pos_;
+    }
+
+    friend bool operator!=(const TempIterator& a, const TempIterator& b) {
+      return !(a == b);
+    }
+
+   private:
+    std::size_t bit_pos_;   // position of bit in bv
+    Bitvector_pointer bv_;  // pointer to bv for iterator
+  };
+
+  using Iterator = TempIterator<Reference, Bitvector*>;
+  using ConstIterator = TempIterator<ConstReference, const Bitvector*>;
+
+  Iterator begin() { return Iterator(0, this); }
+  Iterator end() { return Iterator(num_bits_, this); }
+
+  ConstIterator cbegin() const { return ConstIterator(0, this); }
+  ConstIterator cend() const { return ConstIterator(num_bits_, this); }
 
  private:
   std::vector<Type> bits_;  // vector containing bits

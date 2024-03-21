@@ -212,6 +212,50 @@ TEST(TestBitvector, ostream) {
   EXPECT_EQ(oss.str(), "1100000000");
 }
 
+// Testing Iterator
+TEST(TestBitvector, TestIterator) {
+  unialgo::utils::Bitvector bv(100);
+
+  bv.SetBit(32);
+
+  EXPECT_EQ(bv.GetBit(32), 1);
+  EXPECT_EQ(bv[32], bv.GetBit(32));
+  unialgo::utils::Bitvector::Iterator it = bv.begin();
+  for (int i = 0; i < 32; ++i) {
+    EXPECT_EQ(*it, 0);
+    ++it;
+  }
+  EXPECT_EQ(*it, 1);
+  ++it;
+  *it = 0;
+  EXPECT_EQ(bv[32], 0);
+  for (int i = 33; i < 128; ++i) {
+    EXPECT_EQ(*it, 0);
+    ++it;
+  }
+}
+
+// Testing ConstIterator
+TEST(TestBitvector, TestConstIterator) {
+  unialgo::utils::Bitvector bv(100);
+
+  bv.SetBit(32);
+
+  EXPECT_EQ(bv.GetBit(32), 1);
+  EXPECT_EQ(bv[32], bv.GetBit(32));
+  unialgo::utils::Bitvector::ConstIterator it = bv.cbegin();
+  for (int i = 0; i < 32; ++i) {
+    EXPECT_EQ(*it, 0);
+    ++it;
+  }
+  EXPECT_EQ(*it, 1);
+  ++it;
+  for (int i = 33; i < 128; ++i) {
+    EXPECT_EQ(*it, 0);
+    ++it;
+  }
+}
+
 // ============ Testing WordVector ============
 
 // Testing getters
