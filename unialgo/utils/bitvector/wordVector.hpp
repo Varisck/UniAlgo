@@ -108,6 +108,55 @@ class WordVector {
    */
   friend std::ostream& operator<<(std::ostream& os, const WordVector& wv);
 
+  template <typename Ref_iterator, typename Wordvector_pointer>
+  class TempIterator {
+   public:
+    using iterator_category = std::forward_iterator_tag;
+    // using difference_type = std::ptrdiff_t;
+    using difference_type = long;
+    using value_type = Ref_iterator;
+    using pointer = Ref_iterator*;
+    using reference = Ref_iterator;
+
+    TempIterator(std::size_t bit_pos, Wordvector_pointer bv)
+        : bit_pos_(bit_pos), wv_(bv) {}
+
+    reference operator*() const { return (*wv_)[bit_pos_]; }
+    pointer operator->() { return &((*wv_)[bit_pos_]); }
+
+    TempIterator& operator++() {
+      bit_pos_++;
+      return *this;
+    }
+
+    TempIterator operator++(int) {
+      TempIterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    friend bool operator==(const TempIterator& a, const TempIterator& b) {
+      return a.wv_ == b.wv_ && a.bit_pos_ == b.bit_pos_;
+    }
+
+    friend bool operator!=(const TempIterator& a, const TempIterator& b) {
+      return !(a == b);
+    }
+
+   private:
+    std::size_t bit_pos_;    // position of bit in bv
+    Wordvector_pointer wv_;  // pointer to wv for iterator
+  };
+
+  using Iterator = TempIterator<Reference, WordVector*>;
+  using ConstIterator = TempIterator<ConstReference, const WordVector*>;
+
+  Iterator begin() { return Iterator(0, this); }
+  Iterator end() { return Iterator(num_words_ - 1, this); }
+
+  ConstIterator cbegin() const { return ConstIterator(0, this); }
+  ConstIterator cend() const { return ConstIterator(num_words_ - 1, this); }
+
  private:
   std::vector<Type> bits_;  // vector of bits
   uint8_t word_size_;       // size of a single word to store

@@ -177,10 +177,10 @@ class Bitvector {
   using ConstIterator = TempIterator<ConstReference, const Bitvector*>;
 
   Iterator begin() { return Iterator(0, this); }
-  Iterator end() { return Iterator(num_bits_, this); }
+  Iterator end() { return Iterator(num_bits_ - 1, this); }
 
   ConstIterator cbegin() const { return ConstIterator(0, this); }
-  ConstIterator cend() const { return ConstIterator(num_bits_, this); }
+  ConstIterator cend() const { return ConstIterator(num_bits_ - 1, this); }
 
  private:
   std::vector<Type> bits_;  // vector containing bits

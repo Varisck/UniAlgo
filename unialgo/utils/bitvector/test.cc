@@ -343,6 +343,30 @@ TEST(TestingWordVector, compareRefValues) {
   EXPECT_TRUE(wv[3] >= wv[2]);
 }
 
+// testing iterator
+TEST(TestingWordVector, testingIterator) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  auto it = wv.begin();
+  EXPECT_EQ(*it, 0);
+  ++it;
+  EXPECT_EQ(*it, 1);
+  ++it;
+  EXPECT_EQ(*it, 2);
+  ++it;
+  EXPECT_EQ(*it, 3);
+  ++it;
+}
+
 // testing operator++, operator--
 TEST(TestingWordVector, testIncrementDecrement) {
   unialgo::utils::WordVector wv(10);
