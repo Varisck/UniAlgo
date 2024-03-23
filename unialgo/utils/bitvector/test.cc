@@ -226,8 +226,8 @@ TEST(TestBitvector, TestIterator) {
     ++it;
   }
   EXPECT_EQ(*it, 1);
+  (*it) = 0;
   ++it;
-  *it = 0;
   EXPECT_EQ(bv[32], 0);
   for (int i = 33; i < 128; ++i) {
     EXPECT_EQ(*it, 0);
