@@ -283,6 +283,8 @@ class WordVectorRef {
     return lhs.getValue() == value;
   }
 
+  operator int() const { return getValue(); }
+
   /**
    * @brief Comparison operator between two WordVectorRef
    * @return true if bit values referenced by lhs == bit values referenced by

@@ -407,6 +407,30 @@ TEST(TestingWordVector, testIncrementDecrement) {
   EXPECT_EQ(wv[0], 3);
 }
 
+// testing reference cast to int
+TEST(TestingWordVector, testingReferenceCast) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+
+  int first = wv[0];
+  int second = wv[1];
+  int third = wv[2];
+
+  EXPECT_EQ(first, 0);
+  EXPECT_EQ(second, 1);
+  EXPECT_EQ(third, 2);
+
+  std::size_t sizet = wv[0];
+  EXPECT_EQ(sizet, 0);
+}
+
 // testing ostream on reference
 TEST(TestingWordVector, ostreamWvRef) {
   unialgo::utils::WordVector wv(10);
