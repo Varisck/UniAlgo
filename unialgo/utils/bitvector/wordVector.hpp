@@ -285,6 +285,8 @@ class WordVectorRef {
 
   operator int() const { return getValue(); }
 
+  // operator WordVector::Type() const { return getValue(); }
+
   /**
    * @brief Comparison operator between two WordVectorRef
    * @return true if bit values referenced by lhs == bit values referenced by
