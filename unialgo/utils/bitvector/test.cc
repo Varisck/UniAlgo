@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>  // std::sort
+#include <utility>    // std::swap
+
 #include "unialgo/utils/bitvector/bitVectors.hpp"
 
 namespace {
@@ -319,6 +322,10 @@ TEST(TestingWordVector, compareRefRef) {
   EXPECT_NE(wv[2], wv[0]);
   EXPECT_EQ(wv[0], wv[1]);
   EXPECT_EQ(wv[2], wv[3]);
+
+  unialgo::utils::WordVectorConstReference a = wv[0];
+  // a = wv[0];
+  EXPECT_EQ(a, wv[0]);
 }
 
 // testing compare <, >, <=, >=, in reference
@@ -343,8 +350,283 @@ TEST(TestingWordVector, compareRefValues) {
   EXPECT_TRUE(wv[3] >= wv[2]);
 }
 
+// TEST(TestingWordVector, refAssignmentOp) {
+//   unialgo::utils::WordVector wv(10);
+
+//   wv[0] = 0;
+//   wv[1] = 1;
+//   wv[2] = 2;
+//   wv[3] = 3;
+
+//   EXPECT_EQ(wv[0], 0);
+//   EXPECT_EQ(wv[1], 1);
+//   EXPECT_EQ(wv[2], 2);
+//   EXPECT_EQ(wv[3], 3);
+//   for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+//   unialgo::utils::WordVectorConstReference a(wv[1]);
+//   // a = wv[1];
+//   wv[0] = a;
+//   // wv[0] = wv[1];
+//   EXPECT_EQ(wv[0], 1);
+//   EXPECT_EQ(wv[1], 1);
+//   // wv[2] = *(++wv.begin());
+//   wv[2] = wv[1];
+//   EXPECT_EQ(wv[2], 1);
+//   EXPECT_EQ(wv[3], 3);
+// }
+
+// // testing all combination of operator= on wordvectorreference
+// TEST(TestingWordVector, refAssignmentOpAll) {
+//   unialgo::utils::WordVector wv(10);
+//   wv[0] = 0;
+//   wv[1] = 1;
+//   wv[2] = 2;
+//   wv[3] = 3;
+
+//   EXPECT_EQ(wv[0], 0);
+//   EXPECT_EQ(wv[1], 1);
+//   EXPECT_EQ(wv[2], 2);
+//   EXPECT_EQ(wv[3], 3);
+//   for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+//   // changing value and checking if reference is updated:
+//   unialgo::utils::WordVectorConstReference a(wv[1]);
+//   EXPECT_EQ(a, 1);
+//   wv[1] = 0;
+//   EXPECT_EQ(a, 0);
+//   wv[1] = 1;
+
+//   wv[7] = wv[1];
+//   EXPECT_EQ(wv[7], 1);
+
+//   // assigning rvalue to lvalue reference const and non const:
+//   unialgo::utils::WordVectorReference b(wv[1]);
+//   EXPECT_EQ(b, 1);
+//   wv[0] = b;
+//   EXPECT_EQ(wv[0], 1);
+//   wv[0] = 0;
+//   EXPECT_EQ(wv[0], 0);
+//   wv[0] = a;
+//   EXPECT_EQ(wv[0], 1);
+
+//   // creating reference assiging value and checking if value updates in wv:
+//   unialgo::utils::WordVectorReference c = wv[2];
+//   EXPECT_EQ(c, 2);
+//   c = a;
+//   EXPECT_EQ(c, 1);
+//   EXPECT_EQ(wv[2], 1);
+
+//   // creating const reference and assigning reference
+//   // checking referenced value is changed in obj but value
+//   // is not updated in wv:
+//   wv[5] = 2;
+//   unialgo::utils::WordVectorConstReference d = wv[5];
+//   EXPECT_EQ(d, 2);
+//   d = b;
+//   EXPECT_EQ(d, 1);
+//   EXPECT_EQ(wv[5], 2);
+// }
+
+// testing iterator assignment
+TEST(TestingWordVector, iteratorAssignment) {
+  unialgo::utils::WordVector wv(10);
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
+
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+
+  wv[1] = *(wv.begin());
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 0);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  wv[1] = 1;
+  EXPECT_EQ(wv[1], 1);
+
+  unialgo::utils::WordVector::Iterator it = wv.begin();
+  ++it;
+  EXPECT_EQ(*it, 1);
+  unialgo::utils::WordVector::Iterator it2 = wv.begin();
+  ++it2;
+  ++it2;
+  EXPECT_EQ(*it2, 2);
+
+  it = it2;
+  EXPECT_EQ(*it, 2);
+
+  unialgo::utils::WordVector::ConstIterator cit = wv.cbegin();
+  ++cit;
+  EXPECT_EQ(*cit, 1);
+  unialgo::utils::WordVector::ConstIterator cit2 = wv.cbegin();
+  ++cit2;
+  ++cit2;
+  EXPECT_EQ(*cit2, 2);
+
+  cit = cit2;
+  EXPECT_EQ(*cit, 2);
+}
+
+// testing swap on reference
+
+// testing swap between references
+TEST(TestingWordVector, swapRefRef) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 1;
+  wv[1] = 2;
+
+  EXPECT_EQ(wv[0], 1);
+  EXPECT_EQ(wv[1], 2);
+
+  unialgo::utils::WordVectorReference a = wv[0];
+  unialgo::utils::WordVectorReference b = wv[1];
+
+  EXPECT_EQ(a, 1);
+  EXPECT_EQ(b, 2);
+
+  std::swap(a, b);
+
+  EXPECT_EQ(a, 2);
+  EXPECT_EQ(b, 1);
+
+  EXPECT_EQ(wv[0], 2);
+  EXPECT_EQ(wv[1], 1);
+}
+
 // testing iterator
 TEST(TestingWordVector, testingIterator) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
+  wv[4] = 0;
+  wv[5] = 1;
+  wv[6] = 2;
+  wv[7] = 3;
+  wv[8] = 0;
+  wv[9] = 1;
+  auto i = 0;
+  for (auto it = wv.begin(); it != wv.end(); ++it) {
+    EXPECT_EQ(*it, (i % 4));
+    ++i;
+  }
+}
+
+// testing iter_swap
+TEST(TestingWordVector, iter_swap) {
+  unialgo::utils::WordVector wv(10);
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+
+  std::iter_swap(wv.begin(), wv.begin() + 1);
+  EXPECT_EQ(wv[0], 1);
+  EXPECT_EQ(wv[1], 0);
+  EXPECT_EQ(wv[2], 2);
+}
+
+// testing iterator
+TEST(TestingWordVector, testingIteratorIncrement) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
+  wv[4] = 0;
+  wv[5] = 1;
+  wv[6] = 2;
+  wv[7] = 3;
+  wv[8] = 0;
+  wv[9] = 1;
+  auto it = wv.begin();
+  EXPECT_EQ(*(it++), 0);
+  EXPECT_EQ(*(it), 1);
+  EXPECT_EQ(*++it, 2);
+}
+
+// testing iterator end
+TEST(TestingWordVector, testingIteratorEnd) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[9] = 1;
+  auto it = wv.end();
+  --it;
+  EXPECT_EQ(*it, 1);
+  EXPECT_EQ(std::next(wv.begin(), 10), wv.end());
+}
+
+// testing iterator end
+TEST(TestingWordVector, testingIteratorValueType) {
+  unialgo::utils::WordVector wv(10);
+  wv[0] = 2;
+  wv[1] = 1;
+  EXPECT_EQ(wv[0], 2);
+  EXPECT_EQ(wv[1], 1);
+
+  auto it = wv.begin();
+  auto it2 = wv.begin();
+  ++it2;
+  EXPECT_EQ(*it, 2);
+  EXPECT_EQ(*it2, 1);
+
+  unialgo::utils::WordVector::Iterator::value_type val = std::move(*it);
+  ::testing::StaticAssertTypeEq<decltype(val), unsigned long long int>();
+  EXPECT_EQ(val, 2);
+
+  *it = std::move(*it2);
+  EXPECT_EQ(*it, 1);
+  EXPECT_EQ(*it2, 1);
+  EXPECT_EQ(val, 2);
+
+  *it2 = std::move(val);
+  EXPECT_EQ(*it, 1);
+  EXPECT_EQ(*it2, 2);
+  EXPECT_EQ(val, 2);
+
+  EXPECT_EQ(wv[0], 1);
+  EXPECT_EQ(wv[1], 2);
+}
+
+// testing move_backwords
+TEST(TestingWordVector, testingMoveBackwards) {
+  unialgo::utils::WordVector wv(10);
+
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
+  wv[4] = 0;
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  EXPECT_EQ(wv[4], 0);
+
+  auto first = wv.begin();
+  auto last = std::next(wv.begin(), 3);
+  auto result = wv.end();
+
+  std::move_backward(first, last, result);
+
+  EXPECT_EQ(wv[9], 2);
+  EXPECT_EQ(wv[8], 1);
+  EXPECT_EQ(wv[7], 0);
+}
+
+TEST(TestingWordVector, testingSwap) {
   unialgo::utils::WordVector wv(10);
 
   wv[0] = 0;
@@ -365,6 +647,14 @@ TEST(TestingWordVector, testingIterator) {
   ++it;
   EXPECT_EQ(*it, 3);
   ++it;
+  auto second = wv.begin();
+  ++second;
+  swap(*wv.begin(), *second);
+  EXPECT_EQ(wv[0], 1);
+  EXPECT_EQ(wv[1], 0);
+  std::iter_swap(wv.begin(), second);
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
 }
 
 // testing operator++, operator--
@@ -549,16 +839,16 @@ TEST(TestingWordVector, hashFunctionConstReference) {
   EXPECT_EQ(constWv[3], 3);
   for (int i = 4; i < 10; ++i) EXPECT_EQ(constWv[i], 0);
 
-  EXPECT_EQ(std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]),
-            std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]));
-  EXPECT_EQ(std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]),
-            std::hash<unialgo::utils::WordVectorReference>{}(constWv[1]));
-  EXPECT_NE(std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]),
-            std::hash<unialgo::utils::WordVectorReference>{}(constWv[2]));
-  EXPECT_NE(std::hash<unialgo::utils::WordVectorReference>{}(constWv[0]),
-            std::hash<unialgo::utils::WordVectorReference>{}(constWv[3]));
-  EXPECT_NE(std::hash<unialgo::utils::WordVectorReference>{}(constWv[3]),
-            std::hash<unialgo::utils::WordVectorReference>{}(constWv[2]));
+  EXPECT_EQ(std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[0]),
+            std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[0]));
+  EXPECT_EQ(std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[0]),
+            std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[1]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[0]),
+            std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[2]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[0]),
+            std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[3]));
+  EXPECT_NE(std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[3]),
+            std::hash<unialgo::utils::WordVectorConstReference>{}(constWv[2]));
 }
 
 }  // namespace

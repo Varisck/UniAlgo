@@ -34,5 +34,7 @@ std::ostream& operator<<(std::ostream& os, const WordVector& wv) {
   return os;
 }
 
+// ============ Iterators ============
+
 }  // namespace utils
 }  // namespace unialgo

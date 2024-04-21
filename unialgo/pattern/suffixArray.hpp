@@ -46,7 +46,8 @@ class SuffixArray {
   std::size_t size() const;
 
  private:
-  std::vector<std::size_t> sa_;  // suffix array
+  unialgo::utils::WordVector sa_;
+  // std::vector<std::size_t> sa_;  // suffix array
   // using shared_pointer to original wv for access?
 };
 

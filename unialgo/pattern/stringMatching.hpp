@@ -46,6 +46,16 @@ struct TransitionFunction {
       lookup;  // loockup table key is typeof T[] value: corresponding col in tf
 };
 
+// Specializatino for WordVector
+template <>
+struct TransitionFunction<unialgo::utils::WordVector> {
+  std::vector<std::vector<std::size_t>> tf;  // transition function for automata
+  // loockup table maps single element in pattern to column of transition
+  // function
+  std::unordered_map<unialgo::utils::WordVectorConstReference, std::size_t>
+      lookup;  // loockup table key is typeof T[] value: corresponding col in tf
+};
+
 /**
  * @brief This function creates the transition function for the automata in FSA
  *
