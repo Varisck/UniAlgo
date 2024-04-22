@@ -29,7 +29,7 @@ class WordVectorRef;
 // using WordVectorConstReference = WordVector::ConstReference;
 
 /**
- * @class WordVector
+ * @brief Class WordVector
  * implements a bitvector class with custom word bit size
  */
 class WordVector {
@@ -382,6 +382,7 @@ class WordVectorRef {
   Reference_type* value_;  // full word containing ref value
 };
 
+// reconsider the iterator class (?)
 template <typename Ref_iterator, typename Wordvector_pointer>
 class WordVector::TempIterator {
  public:
@@ -402,6 +403,7 @@ class WordVector::TempIterator {
     return *this;
   }
 
+  // check this may be optimized
   void resetReference() { ref_to_.changeReference((*wv_)[bit_pos_]); }
 
   reference operator*() {

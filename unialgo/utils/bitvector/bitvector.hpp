@@ -22,8 +22,8 @@ namespace utils {
 class BitvectorReference;
 
 /**
- * @class Bitvector
- *
+ * @brief Class Bitvector
+ * a class implementing a vector of bits
  */
 class Bitvector {
  public:
