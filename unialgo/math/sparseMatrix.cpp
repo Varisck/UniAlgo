@@ -29,9 +29,8 @@ SparseMatrix<layout_left>::SparseMatrix(std::vector<std::vector<double>> m) {
   }
 }
 
-template <class LayoutType>
-SparseMatrix<LayoutType>::SparseMatrix(std::vector<double> m, std::size_t r,
-                                       std::size_t c) {
+SparseMatrix<layout_right>::SparseMatrix(std::vector<double> m, std::size_t r,
+                                         std::size_t c) {
   rows_ = r;
   cols_ = c;
   for (std::size_t i = 0; i < rows_; ++i) {
@@ -41,6 +40,34 @@ SparseMatrix<LayoutType>::SparseMatrix(std::vector<double> m, std::size_t r,
       }
     }
   }
+}
+
+SparseMatrix<layout_left>::SparseMatrix(std::vector<double> m, std::size_t r,
+                                        std::size_t c) {
+  rows_ = r;
+  cols_ = c;
+  for (std::size_t i = 0; i < cols_; ++i) {
+    for (std::size_t j = 0; j < rows_; ++j) {
+      if (!dequal(m[i * rows_ + j], 0.0)) {
+        matrix_[i].emplace_back(std::make_pair(j, m[i * rows_ + j]));
+      }
+    }
+  }
+}
+
+template <class LayoutType>
+std::pair<std::size_t, std::size_t> SparseMatrix<LayoutType>::size() {
+  return std::make_pair(rows_, cols_);
+}
+
+template <class LayoutType>
+std::size_t SparseMatrix<LayoutType>::rows() {
+  return rows_;
+}
+
+template <class LayoutType>
+std::size_t SparseMatrix<LayoutType>::cols() {
+  return cols_;
 }
 
 }  // namespace math

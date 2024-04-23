@@ -53,6 +53,30 @@ class SparseMatrix {
 
   ~SparseMatrix() = default;
 
+  /**
+   * @brief Return size of matrix
+   *
+   * @return std::pair<std::size_t, std::size_t> (rows, cols)
+   */
+  std::pair<std::size_t, std::size_t> size();
+
+  std::size_t rows();
+
+  std::size_t cols();
+
+  friend SparseMatrix operator*(SparseMatrix& mat, std::vector<double> vec);
+  friend SparseMatrix operator*(std::vector<double> vec, SparseMatrix& mat);
+
+  /**
+   * @brief Mat + vec
+   * @attention the vector has to have size == mat.rows_
+   *
+   * @param mat Sparse matrix
+   * @param vec vector
+   * @return SparseMatrix result
+   */
+  friend SparseMatrix operator+(SparseMatrix& mat, std::vector<double> vec);
+
  private:
   std::unordered_map<int, std::vector<std::pair<int, double>>> matrix_;
   std::size_t rows_;
