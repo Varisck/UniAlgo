@@ -11,7 +11,13 @@ SparseMatrix<layout_right>::SparseMatrix(std::vector<std::vector<double>> m) {
   for (std::size_t i = 0; i < rows_; ++i) {
     for (std::size_t j = 0; j < cols_; ++j) {
       if (!dequal(m[i][j], 0.0)) {
-        matrix_[i].emplace_back(std::make_pair(j, m[i][j]));
+        if (matrix_.find(i) != matrix_.end()) {
+          matrix_[i].first.emplace_back(j);
+          matrix_[i].second.emplace_back(m[i][j]);
+        } else {
+          matrix_[i] = std::make_pair(std::vector<std::size_t>{j},
+                                      std::vector<double>{m[i][j]});
+        }
       }
     }
   }
@@ -23,7 +29,13 @@ SparseMatrix<layout_left>::SparseMatrix(std::vector<std::vector<double>> m) {
   for (std::size_t i = 0; i < cols_; ++i) {
     for (std::size_t j = 0; j < rows_; ++j) {
       if (!dequal(m[i][j], 0.0)) {
-        matrix_[i].emplace_back(std::make_pair(j, m[i][j]));
+        if (matrix_.find(i) != matrix_.end()) {
+          matrix_[i].first.emplace_back(j);
+          matrix_[i].second.emplace_back(m[i][j]);
+        } else {
+          matrix_[i] = std::make_pair(std::vector<std::size_t>{j},
+                                      std::vector<double>{m[i][j]});
+        }
       }
     }
   }
@@ -36,7 +48,13 @@ SparseMatrix<layout_right>::SparseMatrix(std::vector<double> m, std::size_t r,
   for (std::size_t i = 0; i < rows_; ++i) {
     for (std::size_t j = 0; j < cols_; ++j) {
       if (!dequal(m[i * cols_ + j], 0.0)) {
-        matrix_[i].emplace_back(std::make_pair(j, m[i * cols_ + j]));
+        if (matrix_.find(i) != matrix_.end()) {
+          matrix_[i].first.emplace_back(j);
+          matrix_[i].second.emplace_back(m[i * cols_ + j]);
+        } else {
+          matrix_[i] = std::make_pair(std::vector<std::size_t>{j},
+                                      std::vector<double>{m[i * cols_ + j]});
+        }
       }
     }
   }
@@ -49,7 +67,13 @@ SparseMatrix<layout_left>::SparseMatrix(std::vector<double> m, std::size_t r,
   for (std::size_t i = 0; i < cols_; ++i) {
     for (std::size_t j = 0; j < rows_; ++j) {
       if (!dequal(m[i * rows_ + j], 0.0)) {
-        matrix_[i].emplace_back(std::make_pair(j, m[i * rows_ + j]));
+        if (matrix_.find(i) != matrix_.end()) {
+          matrix_[i].first.emplace_back(j);
+          matrix_[i].second.emplace_back(m[i * rows_ + j]);
+        } else {
+          matrix_[i] = std::make_pair(std::vector<std::size_t>{j},
+                                      std::vector<double>{m[i * rows_ + j]});
+        }
       }
     }
   }

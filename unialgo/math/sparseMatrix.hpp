@@ -78,7 +78,9 @@ class SparseMatrix {
   friend SparseMatrix operator+(SparseMatrix& mat, std::vector<double> vec);
 
  private:
-  std::unordered_map<int, std::vector<std::pair<int, double>>> matrix_;
+  std::unordered_map<std::size_t,
+                     std::pair<std::vector<std::size_t>, std::vector<double>>>
+      matrix_;
   std::size_t rows_;
   std::size_t cols_;
 };
