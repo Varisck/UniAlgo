@@ -10,7 +10,9 @@ WordVector::WordVector(std::size_t num_words, WordVector::Type wordSize)
     : num_words_(num_words),
       word_size_(wordSize),
       bits_(
-          std::ceil((num_words * wordSize) / static_cast<double>(type_size))) {}
+          std::ceil((num_words * wordSize) / static_cast<double>(type_size))) {
+  for (std::size_t i = 0; i < bits_.size(); ++i) bits_[i] = 0;
+}
 
 std::size_t WordVector::getNumBits() const { return num_words_ * word_size_; }
 

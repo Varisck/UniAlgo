@@ -473,8 +473,8 @@ class WordVector::TempIterator {
 
   friend difference_type operator-(const TempIterator& a,
                                    const TempIterator& b) {
-    std::cout << "operator- between " << a.bit_pos_ << " and " << b.bit_pos_
-              << " res is " << a.bit_pos_ - b.bit_pos_ << std::endl;
+    // std::cout << "operator- between " << a.bit_pos_ << " and " << b.bit_pos_
+    //           << " res is " << a.bit_pos_ - b.bit_pos_ << std::endl;
     return a.bit_pos_ - b.bit_pos_;
   }
 

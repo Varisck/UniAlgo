@@ -3,14 +3,13 @@
 
 #include <stdint.h>  // uint64_t
 
-#include <iostream>
+#include <iostream>     // std::cout
 #include <iterator>     // std::forward_iterator_tag;
-#include <ostream>      // ostream
-#include <type_traits>  // std::enable_if std::is_arithmetic
+#include <ostream>      // std::ostream
+#include <type_traits>  // std::enable_if, std::is_arithmetic
 #include <vector>
 
 #include "unialgo/utils/bitvector/bitMaps.hpp"
-#include "unialgo/utils/bitvector/bitvector.hpp"
 
 // TODO: put assert() on accessing bit_positions >= num_bits_
 
