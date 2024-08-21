@@ -30,6 +30,16 @@ WordVector::ConstReference WordVector::operator[](std::size_t pos) const {
                        ((pos * word_size_) % type_size), word_size_);
 }
 
+WordVector::Reference WordVector::at(std::size_t pos) {
+  assert(pos < num_words_ && "Wordvector access out of bounds");
+  return this->operator[](pos);
+}
+
+WordVector::ConstReference WordVector::at(std::size_t pos) const {
+  assert(pos < num_words_ && "Wordvector access out of bounds");
+  return this->operator[](pos);
+}
+
 std::ostream& operator<<(std::ostream& os, const WordVector& wv) {
   for (std::size_t i = wv.size() - 1; i > 0; --i) os << wv[i];
   os << wv[0];

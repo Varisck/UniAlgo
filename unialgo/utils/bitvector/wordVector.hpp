@@ -3,6 +3,7 @@
 
 #include <stdint.h>  // uint64_t
 
+#include <cassert>     // assert
 #include <cmath>       // std::ceil, std::floor
 #include <functional>  // std::hash
 #include <iostream>
@@ -73,6 +74,9 @@ class WordVector {
   /**
    * @brief Accessing word in WordVector
    *
+   * Important: data access with this operator is unchecked,
+   * out of range lookups are undefined
+   *
    * @param pos position of word to access
    * @return Reference to word at position pos in WordVector
    */
@@ -81,10 +85,33 @@ class WordVector {
   /**
    * @brief Accessing word in WordVector
    *
+   * Important: data access with this operator is unchecked,
+   * out of range lookups are undefined
+   *
    * @param pos position of word to access
    * @return Reference to word at position pos in WordVector
    */
   ConstReference operator[](std::size_t pos) const;
+
+  /**
+   * @brief Access to word in WordVector
+   *
+   * This checks the access (pos < num_words_)
+   *
+   * @param pos position of word to access
+   * @return Reference to word at position pos
+   */
+  Reference at(std::size_t pos);
+
+  /**
+   * @brief Access to word in WordVector
+   *
+   * This checks the access (pos < num_words_)
+   *
+   * @param pos position of word to access
+   * @return Reference to word at position pos
+   */
+  ConstReference at(std::size_t pos) const;
 
   /**
    * @brief Get the number of bits in vector (num_words_ * word_size_)
