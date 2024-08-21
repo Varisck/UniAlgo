@@ -35,6 +35,16 @@ Bitvector::ConstReference Bitvector::operator[](std::size_t bit_pos) const {
                             (bit_pos % type_size));
 }
 
+Bitvector::Reference Bitvector::at(std::size_t pos) {
+  assert(pos < num_bits_ && "Bitvector access out of bounds");
+  return this->operator[](pos);
+}
+
+Bitvector::ConstReference Bitvector::at(std::size_t pos) const {
+  assert(pos < num_bits_ && "Bitvector access out of bounds");
+  return this->operator[](pos);
+}
+
 std::size_t Bitvector::getNumBits() const { return num_bits_; }
 
 std::size_t Bitvector::size() const { return num_bits_; }

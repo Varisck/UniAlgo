@@ -261,6 +261,16 @@ TEST(TestBitvector, TestConstIterator) {
   }
 }
 
+TEST(TestBitvector, TestingIteratorEnd) {
+  unialgo::utils::Bitvector bv(100);
+
+  for (auto it = bv.begin(); it != bv.end(); ++it) *it = 1;
+
+  for (int i = 0; i < 100; ++i) EXPECT_EQ(bv[i], 1);
+
+  EXPECT_EQ(bv[100], 0);
+}
+
 // ============ Testing WordVector ============
 
 // Testing getters
