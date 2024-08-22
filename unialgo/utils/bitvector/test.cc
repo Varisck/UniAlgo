@@ -271,6 +271,79 @@ TEST(TestBitvector, TestingIteratorEnd) {
   EXPECT_EQ(bv[100], 0);
 }
 
+// operator()(start, end)
+TEST(TestBitvector, TestingOperatorBits) {
+  unialgo::utils::Bitvector bv(100);
+  bv[0] = 1;
+  bv[1] = 1;
+  bv[2] = 1;
+  bv[3] = 1;
+  EXPECT_EQ(bv[0], 1);
+  EXPECT_EQ(bv[1], 1);
+  EXPECT_EQ(bv[2], 1);
+  EXPECT_EQ(bv[3], 1);
+
+  unialgo::utils::Bitvector v2 = bv(0, 3);
+
+  EXPECT_EQ(v2.getNumBits(), 4);
+  EXPECT_EQ(v2[0], 1);
+  EXPECT_EQ(v2[1], 1);
+  EXPECT_EQ(v2[2], 1);
+  EXPECT_EQ(v2[3], 1);
+  // test getting a full word
+  v2 = bv(0, 64);
+  EXPECT_EQ(v2.getNumBits(), 65);
+  EXPECT_EQ(v2[0], 1);
+  EXPECT_EQ(v2[1], 1);
+  EXPECT_EQ(v2[2], 1);
+  EXPECT_EQ(v2[3], 1);
+  for (int i = 4; i < 64; ++i) EXPECT_EQ(v2[i], 0);
+
+  // making sure bv is not changed (operator() is const)
+  EXPECT_EQ(bv[0], 1);
+  EXPECT_EQ(bv[1], 1);
+  EXPECT_EQ(bv[2], 1);
+  EXPECT_EQ(bv[3], 1);
+}
+
+// operator()(start, end)
+TEST(TestBitvector, TestingOperatorBitsOverflowing) {
+  unialgo::utils::Bitvector bv(100);
+  bv[62] = 1;
+  bv[63] = 1;
+  bv[64] = 1;
+  bv[65] = 1;
+  EXPECT_EQ(bv[62], 1);
+  EXPECT_EQ(bv[63], 1);
+  EXPECT_EQ(bv[64], 1);
+  EXPECT_EQ(bv[65], 1);
+
+  unialgo::utils::Bitvector v2 = bv(62, 65);
+
+  EXPECT_EQ(v2.getNumBits(), 4);
+  EXPECT_EQ(v2[0], 1);
+  EXPECT_EQ(v2[1], 1);
+  EXPECT_EQ(v2[2], 1);
+  EXPECT_EQ(v2[3], 1);
+}
+
+// operator()(start, end)
+TEST(TestBitvector, TestingOperatorBitsLong) {
+  unialgo::utils::Bitvector bv(100);
+
+  for (auto it = bv.begin(); it != bv.end(); ++it) *it = 1;
+
+  bv[12] = 0;
+  bv[98] = 0;
+
+  unialgo::utils::Bitvector v2 = bv(12, 98);
+
+  EXPECT_EQ(v2.getNumBits(), 87);
+  EXPECT_EQ(v2[0], 0);
+  for (int i = 1; i < 86; ++i) EXPECT_EQ(v2[i], 1);
+  EXPECT_EQ(v2[86], 0);
+}
+
 // ============ Testing WordVector ============
 
 // Testing getters

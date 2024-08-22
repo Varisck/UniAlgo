@@ -45,6 +45,41 @@ Bitvector::ConstReference Bitvector::at(std::size_t pos) const {
   return this->operator[](pos);
 }
 
+typename Bitvector::Bitvector Bitvector::operator()(std::size_t start,
+                                                    std::size_t end) const {
+  assert(start < end && "Bitvector operator() start >= end");
+  std::size_t bits_to_read = end - start + 1;
+  Bitvector bv(bits_to_read);
+  std::size_t current_word = 0;            // current word in bv to save
+  std::size_t offset = start % type_size;  // offset relative to word
+  Bitvector::Type const* word =
+      &bits_[start / type_size];         // pointer to word with bits
+  Bitvector::Type w1 = *word >> offset;  // word containing bits in bv
+
+  // read full words as long as possible
+  while (bits_to_read > 64) {
+    w1 = w1 | ((*(word + 1) & utils::lower_bits_set[offset]) << (64 - offset));
+    bv.bits_[current_word] = w1;
+    ++current_word;
+    bits_to_read -= 64;
+    word += 1;
+    w1 = *word >> offset;
+  }
+  // if reamining bites_to_read overflow in next word by offset
+  if ((offset + bits_to_read) > 64) {
+    w1 = w1 |
+         ((*(word + 1) &
+           lower_bits_set[(offset + bits_to_read) & 0x3F])  // like doing % 64
+          << (64 - offset));
+    bv.bits_[current_word] = w1;
+    return bv;
+  }
+  // case where reamining bits_to_read do not overflow the word
+  w1 = w1 & lower_bits_set[bits_to_read];
+  bv.bits_[current_word] = w1;
+  return bv;
+}
+
 std::size_t Bitvector::getNumBits() const { return num_bits_; }
 
 std::size_t Bitvector::size() const { return num_bits_; }

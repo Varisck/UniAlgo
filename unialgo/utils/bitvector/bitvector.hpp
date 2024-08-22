@@ -85,6 +85,25 @@ class Bitvector {
   ConstReference at(std::size_t pos) const;
 
   /**
+   * @brief Access range of bits
+   *
+   * Important: must satisfy: start < end
+   *
+   * @param start starting position to access
+   * @param end end position to access (included)
+   * @return Bitvector containing bits from [start, end]
+   */
+  Bitvector operator()(std::size_t start, std::size_t end) const;
+
+#if __cplusplus >= 202300L
+
+  Bitvector operator[](std::size_t start, std::size_t end) const {
+    return this->operator()(start, end);
+  }
+
+#endif
+
+  /**
    * @brief Set bit in Bitvector
    *
    * @param bit_pos position of bit to set
