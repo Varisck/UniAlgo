@@ -344,6 +344,69 @@ TEST(TestBitvector, TestingOperatorBitsLong) {
   EXPECT_EQ(v2[86], 0);
 }
 
+TEST(TestBitvector, TestingEquality) {
+  unialgo::utils::Bitvector bv(200);
+  for (int i = 32; i < 60; ++i) bv[i] = 1;
+
+  EXPECT_EQ(bv, bv);
+
+  unialgo::utils::Bitvector bv2(200);
+  for (int i = 32; i < 60; ++i) bv2[i] = 1;
+
+  EXPECT_EQ(bv, bv2);
+
+  unialgo::utils::Bitvector bv3(199);
+  for (int i = 32; i < 60; ++i) bv3[i] = 1;
+
+  EXPECT_NE(bv, bv3);
+
+  unialgo::utils::Bitvector bv4(200);
+  for (int i = 0; i < 60; ++i) bv4[i] = 1;
+
+  EXPECT_NE(bv, bv4);
+}
+
+TEST(TestBitvector, TestingDefOperators) {
+  unialgo::utils::Bitvector bv(200);
+  for (int i = 32; i < 60; ++i) bv[i] = 1;
+
+  EXPECT_EQ(bv, bv);
+
+  unialgo::utils::Bitvector bv2 = bv;
+
+  EXPECT_EQ(bv, bv2);
+}
+
+TEST(TestBitvector, TestingHash) {
+  unialgo::utils::Bitvector bv(200);
+
+  for (int i = 32; i < 60; ++i) bv[i] = 1;
+
+  EXPECT_EQ(std::hash<unialgo::utils::Bitvector>{}(bv),
+            std::hash<unialgo::utils::Bitvector>{}(bv));
+
+  unialgo::utils::Bitvector bv2(200);
+
+  for (int i = 32; i < 60; ++i) bv2[i] = 1;
+
+  EXPECT_EQ(std::hash<unialgo::utils::Bitvector>{}(bv),
+            std::hash<unialgo::utils::Bitvector>{}(bv2));
+
+  unialgo::utils::Bitvector bv3(199);
+
+  for (int i = 32; i < 60; ++i) bv3[i] = 1;
+
+  EXPECT_NE(std::hash<unialgo::utils::Bitvector>{}(bv),
+            std::hash<unialgo::utils::Bitvector>{}(bv3));
+
+  unialgo::utils::Bitvector bv4(200);
+
+  for (int i = 0; i < 60; ++i) bv4[i] = 1;
+
+  EXPECT_NE(std::hash<unialgo::utils::Bitvector>{}(bv),
+            std::hash<unialgo::utils::Bitvector>{}(bv4));
+}
+
 // ============ Testing WordVector ============
 
 // Testing getters

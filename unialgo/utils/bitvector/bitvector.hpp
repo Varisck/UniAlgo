@@ -12,6 +12,7 @@
 #include "unialgo/utils/bitvector/bitMaps.hpp"
 
 // TODO: put assert() on accessing bit_positions >= num_bits_
+//       note bv.end() access operator[] with num_bits_
 
 namespace unialgo {
 
@@ -43,10 +44,12 @@ class Bitvector {
    */
   Bitvector() : num_bits_(0), bits_(0) {}
 
-  /**
-   * @brief Destroy the Bitvector object
-   */
-  ~Bitvector();
+  ~Bitvector() = default;
+
+  Bitvector(const Bitvector&) = default;
+  Bitvector(Bitvector&&) = default;
+  Bitvector& operator=(const Bitvector&) = default;
+  Bitvector& operator=(Bitvector&&) = default;
 
   /**
    * @brief Accessing bit in Bitvector
@@ -133,6 +136,13 @@ class Bitvector {
   std::size_t size() const;
 
   /**
+   * @brief Get the Vector inside Bitvector
+   *
+   * @return std::vector<Type> vector of bits
+   */
+  std::vector<Type> getBitVec() const;
+
+  /**
    * @brief Bitwise and on bitvector
    *
    * @param bv Bitvector
@@ -157,6 +167,24 @@ class Bitvector {
   template <typename T, typename = typename std::enable_if<
                             std::is_arithmetic<T>::value, T>::type>
   Bitvector& operator>=(const T value);
+
+  /**
+   * @brief Compare bitvectors
+   *
+   * @param other bitvector to compare this with
+   * @return true bitvector are the same (size and bit values)
+   * @return false bitvectors are not the same
+   */
+  bool operator==(const Bitvector& other) const;
+
+  /**
+   * @brief Compare bitvectors
+   *
+   * @param other bitvector to compare this with
+   * @return true bitvector are the same (size and bit values)
+   * @return false bitvectors are not the same
+   */
+  bool operator!=(const Bitvector& other) const;
 
   /**
    * @brief Output to the steam bits inside bv from left to right (101....)
@@ -336,5 +364,21 @@ Bitvector& Bitvector::operator>=(const T value) {
 
 }  // namespace utils
 }  // namespace unialgo
+
+// hashing
+namespace std {
+template <>
+struct hash<unialgo::utils::Bitvector> {
+  std::size_t operator()(const unialgo::utils::Bitvector& bv) const {
+    size_t seed = 0;
+    for (int value : bv.getBitVec()) {
+      seed ^= std::hash<int>()(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    seed ^= std::hash<size_t>()(bv.getNumBits()) + 0x9e3779b9 + (seed << 6) +
+            (seed >> 2);
+    return seed;
+  }
+};  // namespace std
+}  // namespace std
 
 #endif  // UNIALGO_UTILS_BITVECTOR_

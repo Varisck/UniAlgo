@@ -7,6 +7,7 @@
  */
 
 #include "unialgo/utils/bitvector/bitvector.hpp"
+#include "unialgo/utils/bitvector/rankHelper.hpp"
 #include "unialgo/utils/bitvector/wordVector.hpp"
 
 #endif  // UNIALGO_UTILS_BITVECTORS_

@@ -15,8 +15,6 @@ Bitvector::Bitvector(std::size_t num_bits)
     : num_bits_(num_bits),
       bits_(std::ceil(num_bits / static_cast<double>(type_size))) {}
 
-Bitvector::~Bitvector() { num_bits_ = 0; }
-
 void Bitvector::SetBit(std::size_t bit_pos) {
   bits_[std::floor(bit_pos / type_size)] |= bit_set[bit_pos % type_size];
 }
@@ -83,6 +81,21 @@ typename Bitvector::Bitvector Bitvector::operator()(std::size_t start,
 std::size_t Bitvector::getNumBits() const { return num_bits_; }
 
 std::size_t Bitvector::size() const { return num_bits_; }
+
+std::vector<typename Bitvector::Type> Bitvector::getBitVec() const {
+  return bits_;
+}
+
+bool Bitvector::operator==(const Bitvector& other) const {
+  if (this->getNumBits() != other.getNumBits()) return false;
+  for (std::size_t i = 0; i < bits_.size(); ++i)
+    if (bits_[i] != other.bits_[i]) return false;
+  return true;
+}
+
+bool Bitvector::operator!=(const Bitvector& other) const {
+  return !(*this == other);
+}
 
 Bitvector Bitvector::operator&(const Bitvector& bv) {
   // assert(bv.bits_.size() == bits_.size() && "bitvector size not matching");
