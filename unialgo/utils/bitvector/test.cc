@@ -1028,11 +1028,33 @@ TEST(TestingHelpers, TestingSize) {
   EXPECT_EQ(helper.rank(100), 4);
   bv->operator[](100) = 1;
   unialgo::utils::RankHelper helper2(bv);
-  EXPECT_EQ(helper.rank(0), 0);
-  EXPECT_EQ(helper.rank(6), 1);
-  EXPECT_EQ(helper.rank(16), 3);
-  EXPECT_EQ(helper.rank(99), 4);
-  EXPECT_EQ(helper.rank(100), 4);
+  EXPECT_EQ(helper2.rank(0), 0);
+  EXPECT_EQ(helper2.rank(6), 1);
+  EXPECT_EQ(helper2.rank(16), 3);
+  EXPECT_EQ(helper2.rank(99), 4);
+  EXPECT_EQ(helper2.rank(100), 5);
+}
+
+TEST(TestingHelpers, TestingStart) {
+  auto bv = std::make_shared<unialgo::utils::Bitvector>(101);
+  bv->operator[](0) = 1;
+  bv->operator[](1) = 1;
+  bv->operator[](9) = 1;
+  bv->operator[](10) = 1;
+  bv->operator[](99) = 1;
+  unialgo::utils::RankHelper helper(bv);
+  EXPECT_EQ(helper.rank(0), 1);
+  EXPECT_EQ(helper.rank(6), 2);
+  EXPECT_EQ(helper.rank(16), 4);
+  EXPECT_EQ(helper.rank(99), 5);
+  EXPECT_EQ(helper.rank(100), 5);
+  bv->operator[](100) = 1;
+  unialgo::utils::RankHelper helper2(bv);
+  EXPECT_EQ(helper2.rank(0), 1);
+  EXPECT_EQ(helper2.rank(6), 2);
+  EXPECT_EQ(helper2.rank(16), 4);
+  EXPECT_EQ(helper2.rank(99), 5);
+  EXPECT_EQ(helper2.rank(100), 6);
 }
 
 }  // namespace

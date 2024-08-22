@@ -29,9 +29,7 @@ class RankHelper {
     second_ = unialgo::utils::WordVector(
         bv->size() / size_second_ + 1,
         std::ceil(std::log(size_second_) / std::log(2)));
-    debug();
     init();
-    debug();
   };
 
   RankHelper(const RankHelper&) = default;
@@ -55,16 +53,16 @@ class RankHelper {
     if (indx % size_second_ == 0)
       return first_[indx / size_first_] + second_[indx / size_second_];
     // constant except when indx is over the last element of the second layer
-    if (size_second_ * indx / size_second_ + size_second_ - 1 <=
+    if (size_second_ * (indx / size_second_) + size_second_ - 1 <
         bv_ptr_->getNumBits()) {
       auto bv = bv_ptr_->operator()(
-          size_second_ * indx / size_second_ + 1,
-          size_second_ * indx / size_second_ + size_second_ - 1);
+          size_second_ * (indx / size_second_) + 1,
+          size_second_ * (indx / size_second_) + size_second_ - 1);
       return first_[indx / size_first_] + second_[indx / size_second_] +
              t.at(bv)[indx % size_second_ - 1];
     } else {
       std::size_t count = 0;
-      for (std::size_t i = size_second_ * indx / size_second_ + 1; i <= indx;
+      for (std::size_t i = size_second_ * (indx / size_second_) + 1; i <= indx;
            ++i)
         if (bv_ptr_->GetBit(i)) ++count;
       return first_[indx / size_first_] + second_[indx / size_second_] + count;
@@ -91,7 +89,7 @@ class RankHelper {
         if ((i / size_second_ + 1) < second_.size()) {
           // brings count forward
           second_[i / size_second_ + 1] = second_[i / size_second_];
-          // make hashmap
+          // populate hasmap
           auto bv = bv_ptr_->operator()(i + 1, i + size_second_ - 1);
           if (t.find(bv) == t.end()) {
             utils::WordVector wv(size_second_ - 1, size_wv_word);
@@ -103,50 +101,10 @@ class RankHelper {
         }
       }
     }
-
-    utils::Bitvector bv(size_second_ - 1);
-    // for (std::size_t i = 0; i < size_second_; ++i) {
-    // }
   }
 
   std::size_t GetFirstBlockSize() const { return size_first_; }
   std::size_t GetSecondBlockSize() const { return size_second_; }
-
-  void debug() {
-    std::cout << "FirstLayerSize: " << size_first_
-              << " SecondLayerSize: " << size_second_ << std::endl
-              << " length array first: " << first_.size()
-              << " length second: " << second_.size() << std::endl;
-    for (int i = 0; i < bv_ptr_->getNumBits(); ++i) {
-      std::cout << bv_ptr_->GetBit(i) << " ";
-    }
-    std::cout << std::endl;
-    for (int i = 0; i < bv_ptr_->getNumBits(); ++i) {
-      if (i % size_first_ == 0 && i / size_first_ < first_.size())
-        std::cout << static_cast<unsigned long long>(
-                         first_[i / size_first_].getValue())
-                  << " ";
-      else
-        std::cout << "  ";
-    }
-    std::cout << std::endl;
-    for (int i = 0; i < bv_ptr_->getNumBits(); ++i) {
-      if (i % size_second_ == 0 && i / size_second_ < second_.size())
-        std::cout << static_cast<unsigned long long>(
-                         second_[i / size_second_].getValue())
-                  << " ";
-      else
-        std::cout << "  ";
-    }
-    std::cout << std::endl;
-
-    std::cout << "Hashmap: " << std::endl;
-
-    for (auto it = t.begin(); it != t.end(); ++it) {
-      std::cout << "Key: " << it->first << ": " << it->second << std::endl;
-    }
-    std::cout << std::endl;
-  }
 
  private:
   std::shared_ptr<unialgo::utils::Bitvector>
