@@ -6,7 +6,7 @@ namespace utils {
 
 WordVector::WordVector() : num_words_(0), word_size_(2), bits_(0) {}
 
-WordVector::WordVector(std::size_t num_words, WordVector::Type wordSize)
+WordVector::WordVector(std::size_t num_words, uint8_t wordSize)
     : num_words_(num_words),
       word_size_(wordSize),
       bits_(

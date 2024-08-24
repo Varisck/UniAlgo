@@ -52,7 +52,7 @@ class WordVector {
    * @param num_words num words to store in vector
    * @param wordSize size of a word (default = 2)
    */
-  WordVector(std::size_t num_words, Type wordSize = 2);
+  WordVector(std::size_t num_words, uint8_t wordSize = 2);
 
   /**
    * @brief Construct a new Word Vector object

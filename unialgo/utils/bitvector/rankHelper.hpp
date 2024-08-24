@@ -84,10 +84,23 @@ class RankHelper {
    * @return std::size_t # of bits set to value [0, indx] (returns 0 if pointer
    * = nullptr)
    */
-  std::size_t rank(std::size_t indx, bool value) {
+  std::size_t rank(std::size_t indx, bool value) const {
     if (bv_ptr_.get() == nullptr) return 0;
     if (value) return rank(indx);  // count 1
     return indx - rank(indx);      // count 0
+  }
+
+  /**
+   * @brief Counter of value from start to end
+   *
+   * @param start range
+   * @param end range
+   * @param value what to count 0, 1
+   * @return std::size_t # ob bits set to value in [start, end]
+   */
+  std::size_t rank(std::size_t start, std::size_t end, bool value) const {
+    if (start == 0) return rank(end, value);
+    return rank(end, value) - rank(start - 1, value);
   }
 
   /**
@@ -100,7 +113,7 @@ class RankHelper {
    * @return std::size_t position in bv of the i-th value, -1 if not present
    * (returns 0 if pointer = nullptr)
    */
-  std::size_t select(std::size_t count, bool value) {
+  std::size_t select(std::size_t count, bool value) const {
     if (bv_ptr_.get() == nullptr) return 0;
 
     std::size_t start = 0;
