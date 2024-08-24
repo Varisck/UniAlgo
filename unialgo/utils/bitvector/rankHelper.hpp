@@ -15,11 +15,15 @@
  *
  */
 
+// TODO: maybe put assert on rank/select(x) with x >= n
+
 namespace unialgo {
 namespace utils {
 
 class RankHelper {
  public:
+  RankHelper() : bv_ptr_() {};
+
   RankHelper(std::shared_ptr<unialgo::utils::Bitvector> bv) : bv_ptr_(bv) {
     size_second_ = std::ceil(std::log(bv->size()) / 2);
     size_first_ = std::pow(size_second_, 2);
@@ -43,12 +47,15 @@ class RankHelper {
    * Rank is constant in time O(1)
    *
    * Note: when indx is over the last element of the second layer implementation
-   * is O(log(n) / 2) (very rare case)
+   * is O(log(n) / 2) (very rare case!)
    *
    * @param indx index (must be valid)
-   * @return std::size_t # of bits set to 1 [0, indx]
+   * @return std::size_t # of bits set to 1 [0, indx] (returns 0 if pointer
+   * = nullptr)
    */
   std::size_t rank(std::size_t indx) const {
+    // assert()
+    if (bv_ptr_.get() == nullptr) return 0;
     if (indx % size_first_ == 0) return first_[indx / size_first_];
     if (indx % size_second_ == 0)
       return first_[indx / size_first_] + second_[indx / size_second_];
@@ -59,7 +66,7 @@ class RankHelper {
           size_second_ * (indx / size_second_) + 1,
           size_second_ * (indx / size_second_) + size_second_ - 1);
       return first_[indx / size_first_] + second_[indx / size_second_] +
-             t.at(bv)[indx % size_second_ - 1];
+             t_.at(bv)[indx % size_second_ - 1];
     } else {
       std::size_t count = 0;
       for (std::size_t i = size_second_ * (indx / size_second_) + 1; i <= indx;
@@ -67,6 +74,51 @@ class RankHelper {
         if (bv_ptr_->GetBit(i)) ++count;
       return first_[indx / size_first_] + second_[indx / size_second_] + count;
     }
+  }
+
+  /**
+   * @brief Rank helper for bitvector
+   *
+   * @param indx index (must be valid)
+   * @param value what to count 0, 1
+   * @return std::size_t # of bits set to value [0, indx] (returns 0 if pointer
+   * = nullptr)
+   */
+  std::size_t rank(std::size_t indx, bool value) {
+    if (bv_ptr_.get() == nullptr) return 0;
+    if (value) return rank(indx);  // count 1
+    return indx - rank(indx);      // count 0
+  }
+
+  /**
+   * @brief Select helper for bitvector
+   *
+   * Note this implementation is O(log(n))
+   *
+   * @param count i-th element searched
+   * @param value what to search 0, 1
+   * @return std::size_t position in bv of the i-th value, -1 if not present
+   * (returns 0 if pointer = nullptr)
+   */
+  std::size_t select(std::size_t count, bool value) {
+    if (bv_ptr_.get() == nullptr) return 0;
+
+    std::size_t start = 0;
+    std::size_t end = bv_ptr_->getNumBits() - 1;
+
+    while (start <= end) {
+      std::size_t mid = start + (end - start) / 2;
+      // found first occ of i-th element
+      if ((mid == 0 || count > rank(mid - 1, value)) &&
+          rank(mid, value) == count)
+        return mid;
+      // classic search
+      else if (rank(mid, value) < count)
+        start = mid + 1;
+      else
+        end = mid - 1;
+    }
+    return -1;
   }
 
   /**
@@ -91,12 +143,14 @@ class RankHelper {
           second_[i / size_second_ + 1] = second_[i / size_second_];
           // populate hasmap
           auto bv = bv_ptr_->operator()(i + 1, i + size_second_ - 1);
-          if (t.find(bv) == t.end()) {
+          if (t_.find(bv) == t_.end()) {
             utils::WordVector wv(size_second_ - 1, size_wv_word);
             wv[0] = bv[0].getValue();
-            for (std::size_t j = 1; j < bv.getNumBits(); ++j)
-              if (bv.at(j) == 1) wv[j] = wv[j - 1] + 1;
-            t.emplace(bv, wv);
+            for (std::size_t j = 1; j < bv.getNumBits(); ++j) {
+              wv[j] = wv[j - 1];
+              if (bv.at(j) == 1) ++wv[j];
+            }
+            t_.emplace(bv, wv);
           }
         }
       }
@@ -106,6 +160,50 @@ class RankHelper {
   std::size_t GetFirstBlockSize() const { return size_first_; }
   std::size_t GetSecondBlockSize() const { return size_second_; }
 
+  void debug() {
+    std::cout << "FirstLayerSize: " << size_first_
+              << " SecondLayerSize: " << size_second_ << std::endl
+              << " length array first: " << first_.size()
+              << " length second: " << second_.size() << std::endl;
+    for (int i = 0; i < bv_ptr_->getNumBits(); ++i) {
+      std::cout << bv_ptr_->GetBit(i) << " ";
+    }
+    std::cout << std::endl;
+    for (int i = 0; i < bv_ptr_->getNumBits(); ++i) {
+      if (i % size_first_ == 0 && i / size_first_ < first_.size())
+        std::cout << static_cast<unsigned long long>(
+                         first_[i / size_first_].getValue())
+                  << " ";
+      else
+        std::cout << "  ";
+    }
+    std::cout << std::endl;
+    for (int i = 0; i < bv_ptr_->getNumBits(); ++i) {
+      if (i % size_second_ == 0 && i / size_second_ < second_.size())
+        std::cout << static_cast<unsigned long long>(
+                         second_[i / size_second_].getValue())
+                  << " ";
+      else
+        std::cout << "  ";
+    }
+    std::cout << std::endl;
+
+    std::cout << "Hashmap: " << std::endl;
+
+    for (auto it = t_.begin(); it != t_.end(); ++it) {
+      std::cout << "Key: ";
+      for (int i = 0; i < it->first.size(); ++i) {
+        std::cout << it->first[i];
+      }
+      std::cout << ": ";
+      for (int i = 0; i < it->second.size(); ++i) {
+        std::cout << it->second[i].getValue() << " ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+
  private:
   std::shared_ptr<unialgo::utils::Bitvector>
       bv_ptr_;  // shared_ptr to bitvector
@@ -114,9 +212,9 @@ class RankHelper {
   unialgo::utils::WordVector first_;
   unialgo::utils::WordVector second_;
   std::unordered_map<unialgo::utils::Bitvector, unialgo::utils::WordVector>
-      t;  // hashmap for 3 layer instant lookup
-          // <bitvector between 2 second layer values, array with count at
-          // position relative to key>
+      t_;  // hashmap for 3 layer instant lookup
+           // <bitvector between 2 second layer values, array with count at
+           // position relative to key>
 
   std::size_t size_first_;   // first layer's block size
   std::size_t size_second_;  // second layer's block size

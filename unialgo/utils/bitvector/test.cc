@@ -1057,4 +1057,35 @@ TEST(TestingHelpers, TestingStart) {
   EXPECT_EQ(helper2.rank(100), 6);
 }
 
+TEST(TestingHelpers, TestingSelect) {
+  auto bv = std::make_shared<unialgo::utils::Bitvector>(101);
+  bv->operator[](0) = 1;
+  bv->operator[](1) = 1;
+  bv->operator[](9) = 1;
+  bv->operator[](10) = 1;
+  bv->operator[](99) = 1;
+  unialgo::utils::RankHelper helper(bv);
+  EXPECT_EQ(helper.rank(0), 1);
+  EXPECT_EQ(helper.rank(2), 2);
+  EXPECT_EQ(helper.rank(6), 2);
+  EXPECT_EQ(helper.rank(16), 4);
+  EXPECT_EQ(helper.rank(99), 5);
+  EXPECT_EQ(helper.rank(100), 5);
+  bv->operator[](100) = 1;
+  unialgo::utils::RankHelper helper2(bv);
+  EXPECT_EQ(helper2.rank(0), 1);
+  EXPECT_EQ(helper2.rank(2), 2);
+  EXPECT_EQ(helper2.rank(6), 2);
+  EXPECT_EQ(helper2.rank(16), 4);
+  EXPECT_EQ(helper2.rank(99), 5);
+  EXPECT_EQ(helper2.rank(100), 6);
+
+  std::cout << "select(2, 1): " << std::endl;
+
+  EXPECT_EQ(helper2.select(2, 1), 1);
+
+  std::cout << "select(4, 1): " << std::endl;
+  EXPECT_EQ(helper2.select(4, 1), 10);
+}
+
 }  // namespace
