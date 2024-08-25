@@ -29,10 +29,10 @@ class RankHelper {
     size_first_ = std::pow(size_second_, 2);
     first_ = unialgo::utils::WordVector(
         bv->size() / size_first_ + 1,
-        std::ceil(std::log(size_first_) / std::log(2)));
+        std::ceil(std::log(bv.get()->size()) / std::log(2)));
     second_ = unialgo::utils::WordVector(
         bv->size() / size_second_ + 1,
-        std::ceil(std::log(size_second_) / std::log(2)));
+        std::ceil(std::log(size_first_) / std::log(2)));
     init();
   };
 
@@ -87,7 +87,7 @@ class RankHelper {
   std::size_t rank(std::size_t indx, bool value) const {
     if (bv_ptr_.get() == nullptr) return 0;
     if (value) return rank(indx);  // count 1
-    return indx - rank(indx);      // count 0
+    return indx - rank(indx) + 1;  // count 0
   }
 
   /**

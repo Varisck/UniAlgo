@@ -32,9 +32,14 @@ TEST(TestingWavelet, Access) {
   EXPECT_EQ(mat.getStringSize(), wv.size());
   EXPECT_EQ(mat.getMatrixDepth(), wv.getWordSize());
 
-  mat.print();
+  // std::cout << std::endl;
+  // mat.print();
 
   EXPECT_EQ(mat.acces(0), wv[0].getValue());
+  EXPECT_EQ(mat.acces(1), wv[1].getValue());
+  EXPECT_EQ(mat.acces(3), wv[3].getValue());
+  EXPECT_EQ(mat.acces(7), wv[7].getValue());
+  EXPECT_EQ(mat.acces(10), wv[10].getValue());
 }
 
 }  // namespace

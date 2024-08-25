@@ -8,8 +8,6 @@ namespace utils {
 
 WaveletMatrix::WaveletMatrix(const utils::WordVector& string)
     : string_size_(string.size()) {
-  std::cout << "WordSize: " << static_cast<unsigned int>(string.getWordSize())
-            << std::endl;
   // matrix_depth_ = len_alphabet, assume len alphabet is wordSize
   matrix_depth_ = string.getWordSize();
 
@@ -27,8 +25,9 @@ WaveletMatrix::WaveletMatrix(const utils::WordVector& string)
     // to update the layer_order
     std::vector<utils::WordVector::Type> zeros, ones;
 
-    for (auto a : layer_order) std::cout << a;
-    std::cout << std::endl;
+    // debugging layer order
+    // for (auto a : layer_order) std::cout << a;
+    // std::cout << std::endl;
 
     for (std::size_t i = 0; i < string.size(); ++i) {
       // bit_to_check is set in word
@@ -59,16 +58,17 @@ uint64_t WaveletMatrix::acces(std::size_t indx) const {
 
   for (std::size_t layer = 0; layer < matrix_depth_; ++layer) {
     bool value = (*matrix_)[pos + layer * string_size_].getValue();
-    // conditionaly set or clear bit (from
-    // https://graphics.stanford.edu/~seander/bithacks.html)
+
+    // conditionaly set or clear bit (bit hacks)
     res ^= (-value ^ res) & bit_to_set;
-    // if value = 1 neet to add to position count of 0s in layer
+    // if value = 1 need to add to position count of 0s in layer
     // to get position of 1 in next layer need to skip all the 0s
     pos =
         helper_.rank(layer * string_size_, pos + layer * string_size_, value) +
-        helper_.rank(layer * string_size_,
-                     layer * string_size_ + string_size_ - 1, 0) *
-            value;
+        (helper_.rank(layer * string_size_,
+                      layer * string_size_ + string_size_ - 1, 0)) *
+            value -
+        1;
     bit_to_set = bit_to_set >> 1;
   }
   return res;
@@ -81,6 +81,9 @@ void WaveletMatrix::print() const {
     }
     std::cout << std::endl;
   }
+  std::cout << std::endl;
+  for (int i = 24; i < 48; ++i) std::cout << (*matrix_)[i];
+  std::cout << std::endl;
 }
 
 }  // namespace utils

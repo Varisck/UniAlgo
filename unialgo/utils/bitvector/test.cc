@@ -1080,12 +1080,52 @@ TEST(TestingHelpers, TestingSelect) {
   EXPECT_EQ(helper2.rank(99), 5);
   EXPECT_EQ(helper2.rank(100), 6);
 
-  std::cout << "select(2, 1): " << std::endl;
-
   EXPECT_EQ(helper2.select(2, 1), 1);
-
-  std::cout << "select(4, 1): " << std::endl;
   EXPECT_EQ(helper2.select(4, 1), 10);
+}
+
+TEST(TestingHelpers, TestingRank0s) {
+  auto bv = std::make_shared<unialgo::utils::Bitvector>(101);
+  bv->operator[](0) = 1;
+  bv->operator[](1) = 1;
+  bv->operator[](9) = 1;
+  bv->operator[](10) = 1;
+  bv->operator[](99) = 1;
+  unialgo::utils::RankHelper helper(bv);
+  EXPECT_EQ(helper.rank(0), 1);
+  EXPECT_EQ(helper.rank(2), 2);
+  EXPECT_EQ(helper.rank(6), 2);
+  EXPECT_EQ(helper.rank(16), 4);
+  EXPECT_EQ(helper.rank(99), 5);
+  EXPECT_EQ(helper.rank(100), 5);
+  bv->operator[](100) = 1;
+  unialgo::utils::RankHelper helper2(bv);
+  EXPECT_EQ(helper2.rank(0), 1);
+  EXPECT_EQ(helper2.rank(2), 2);
+  EXPECT_EQ(helper2.rank(6), 2);
+  EXPECT_EQ(helper2.rank(16), 4);
+  EXPECT_EQ(helper2.rank(99), 5);
+  EXPECT_EQ(helper2.rank(100), 6);
+
+  EXPECT_EQ(helper2.rank(12, 0), 9);
+  EXPECT_EQ(helper2.rank(12, 1), 4);
+  EXPECT_EQ(helper2.rank(11, 22, 0), 12);
+  EXPECT_EQ(helper2.rank(11, 22, 1), 0);
+  EXPECT_EQ(helper2.rank(1, 22, 0), 19);
+  EXPECT_EQ(helper2.rank(1, 22, 1), 3);
+  EXPECT_EQ(helper2.rank(50, 90, 0), 41);
+  EXPECT_EQ(helper2.rank(50, 90, 1), 0);
+  std::size_t count1 = 0;
+  std::size_t count0 = 0;
+  for (auto i : (*bv)) {
+    if (i.getValue() == 1)
+      ++count1;
+    else
+      ++count0;
+  }
+
+  EXPECT_EQ(helper2.rank(0, 100, 0), count0);
+  EXPECT_EQ(helper2.rank(0, 100, 1), count1);
 }
 
 }  // namespace
