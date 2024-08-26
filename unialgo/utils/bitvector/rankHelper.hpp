@@ -100,6 +100,7 @@ class RankHelper {
    */
   std::size_t rank(std::size_t start, std::size_t end, bool value) const {
     if (start == 0) return rank(end, value);
+    if (rank(end, value) <= rank(start - 1, value)) return 0;
     return rank(end, value) - rank(start - 1, value);
   }
 

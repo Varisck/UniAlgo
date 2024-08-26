@@ -25,6 +25,8 @@ class WaveletMatrix {
    */
   uint64_t acces(std::size_t indx) const;
 
+  std::size_t rank(const uint64_t character, std::size_t pos) const;
+
   void print() const;
 
   std::size_t getStringSize() const;
@@ -35,7 +37,7 @@ class WaveletMatrix {
   std::size_t matrix_depth_;                           // depth of the matrix
   std::shared_ptr<unialgo::utils::Bitvector> matrix_;  // bitvector for matrix_
   unialgo::utils::RankHelper helper_;  // helper for constant rank on bv
-
+  unialgo::utils::WordVector Zs;       // #0s in layerss
 };  // class WaveletMatrix
 
 }  // namespace utils

@@ -198,6 +198,8 @@ inline uint64_t read_bits(const uint64_t* word, uint8_t offset,
   }
 }
 
+inline uint64_t getLog2(const uint64_t value) { return 0; }
+
 }  // namespace utils
 }  // namespace unialgo
 
