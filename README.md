@@ -4,19 +4,24 @@ This library is a personal project developed to explore and familiarize myself w
 ## Structure:
 Here is a list of the namspaces whit some of the main content in them. The top level namespace ``unialgo`` is divided in the following sub-namespaces:
 - utils: utility/helpers used in the library like:
-  - Bitvectors, WordVectors
   - AlignedAlloc
+  - Succinct Data Structure:
+    - Bitvectors, WordVectors
+    - RankHelper (Bitvectors)
+    - WaveletMatrix
 - pattern
   - Pattern matching algorithms
   - Data structures for pattern matching
+    - Suffix Arrays
+    - BWT
 - math
   - Dot product using simd
 - Perceptron: class implementing basic perceptron (Rosenblatt)
 
 ## Contributing
-I'm happy to receive and actively encourage code reviews. Constructive feedback not only improves the quality of the code but also provides an excellent opportunity to learn and enhance our understanding of C++ best practices. Feel free to share your insights, suggestions, and recommendations. 
+I'm happy to receive and actively encourage code reviews. Constructive feedback not only improves the quality of the code but also provides an excellent opportunity to learn and enhance my understanding of C++, and C++ best practices. Feel free to share your insights, suggestions, and recommendations. 
 
-This is the first official project where I use CMake. Help and suggestions are more than welcomed!
+This is the first project where I use CMake. Help and suggestions are more than welcomed!
 
 ### Contact
 
