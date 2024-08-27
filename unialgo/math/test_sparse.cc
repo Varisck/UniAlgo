@@ -150,8 +150,8 @@ TEST(TestSparseMatrix, TestTranspose) {
   EXPECT_EQ(matRight2.cols(), 2);
   EXPECT_EQ(matRight2.size().first, 3);
   EXPECT_EQ(matRight2.size().second, 2);
-  matRight2.debug();
-  std::cout << "NOT SORTED" << std::endl;
+  // matRight2.debug();
+  // std::cout << "NOT SORTED" << std::endl;
 }
 
 }  // namespace

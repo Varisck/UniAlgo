@@ -13,6 +13,7 @@ namespace utils {
 
 class WaveletMatrix {
  public:
+  WaveletMatrix() = default;
   WaveletMatrix(const unialgo::utils::WordVector& string);
 
   ~WaveletMatrix() = default;
@@ -60,7 +61,7 @@ class WaveletMatrix {
   std::size_t matrix_depth_;                           // depth of the matrix
   std::shared_ptr<unialgo::utils::Bitvector> matrix_;  // bitvector for matrix_
   unialgo::utils::RankHelper helper_;  // helper for constant rank on bv
-  unialgo::utils::WordVector Zs;       // #0s in layerss
+  unialgo::utils::WordVector Zs_;      // #0s in layerss
 };  // class WaveletMatrix
 
 }  // namespace utils

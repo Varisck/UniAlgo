@@ -45,7 +45,7 @@ Bitvector::ConstReference Bitvector::at(std::size_t pos) const {
 
 typename Bitvector::Bitvector Bitvector::operator()(std::size_t start,
                                                     std::size_t end) const {
-  assert(start < end && "Bitvector operator() start >= end");
+  assert(start <= end && "Bitvector operator() start > end");
   std::size_t bits_to_read = end - start + 1;
   Bitvector bv(bits_to_read);
   std::size_t current_word = 0;            // current word in bv to save

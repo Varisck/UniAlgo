@@ -1,6 +1,7 @@
 # create library unialgo::pattern
 add_library("pattern" "")
-target_sources("pattern" PUBLIC "stringMatching.hpp" "wordVecMatching.hpp" "matchingAlgo.hpp" "suffixArray.hpp" "stringMatching.cpp"  "wordVecMatching.cpp" "suffixArray.cpp")
+target_sources("pattern" PUBLIC "stringMatching.hpp" "wordVecMatching.hpp" "matchingAlgo.hpp" "suffixArray.hpp"
+ "stringMatching.cpp"  "wordVecMatching.cpp" "suffixArray.cpp" "bwt.hpp" "bwt.cpp")
 add_library(unialgo::pattern ALIAS "pattern")
 
 # tests: 
@@ -12,7 +13,7 @@ add_executable(
 )
 target_link_libraries(
   match_test
-  unialgo::utils::bitvector
+  unialgo::utils
   unialgo::pattern
   GTest::gtest_main
 )
@@ -24,7 +25,7 @@ add_executable(
 )
 target_link_libraries(
   match_wv_test
-  unialgo::utils::bitvector
+  unialgo::utils
   unialgo::pattern
   GTest::gtest_main
 )
@@ -36,7 +37,7 @@ add_executable(
 )
 target_link_libraries(
   test_sa
-  unialgo::utils::bitvector
+  unialgo::utils
   unialgo::pattern
   GTest::gtest_main
 )

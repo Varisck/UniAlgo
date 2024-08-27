@@ -11,8 +11,8 @@
 
 namespace {
 
-TEST(TestingWavelet, Construction) {
-  std::string s = "476532101417476532101417";
+TEST(TestingWavelet, ConstructionSmall) {
+  std::string s = "476532101417";
 
   auto alph = unialgo::pattern::GetAlphabet(s);
   auto wv = unialgo::pattern::StringToBitVector(s, alph);
@@ -20,6 +20,10 @@ TEST(TestingWavelet, Construction) {
   unialgo::utils::WaveletMatrix mat(wv);
   EXPECT_EQ(mat.getStringSize(), wv.size());
   EXPECT_EQ(mat.getMatrixDepth(), wv.getWordSize());
+
+  EXPECT_EQ(mat.acces(0), wv[0].getValue());
+  EXPECT_EQ(mat.acces(1), wv[1].getValue());
+  EXPECT_EQ(mat.acces(2), wv[2].getValue());
 }
 
 TEST(TestingWavelet, Access) {
@@ -53,6 +57,26 @@ TEST(TestingWavelet, rank) {
   EXPECT_EQ(mat.rank(alph['3'], 2), 0);
   EXPECT_EQ(mat.rank(alph['4'], 9), 2);
   EXPECT_EQ(mat.rank(alph['4'], s.length() - 1), 4);
+}
+
+TEST(TestingWavelet, rankSmall) {
+  std::string s = "476532101417";
+
+  auto alph = unialgo::pattern::GetAlphabet(s);
+  auto wv = unialgo::pattern::StringToBitVector(s, alph);
+
+  unialgo::utils::WaveletMatrix mat(wv);
+  EXPECT_EQ(mat.getStringSize(), wv.size());
+  EXPECT_EQ(mat.getMatrixDepth(), wv.getWordSize());
+
+  EXPECT_EQ(mat.acces(0), wv[0].getValue());
+  EXPECT_EQ(mat.acces(1), wv[1].getValue());
+  EXPECT_EQ(mat.acces(2), wv[2].getValue());
+
+  EXPECT_EQ(mat.rank(alph['4'], 0), 1);
+  EXPECT_EQ(mat.rank(alph['4'], 1), 1);
+  EXPECT_EQ(mat.rank(alph['4'], 2), 1);
+  EXPECT_EQ(mat.rank(alph['4'], 9), 2);
 }
 
 TEST(TestingWavelet, rank2) {

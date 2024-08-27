@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "unialgo/pattern/bwt.hpp"
 #include "unialgo/pattern/matchingAlgo.hpp"
 #include "unialgo/pattern/suffixArray.hpp"
 
@@ -55,14 +56,15 @@ TEST(StringWVecConversion, SortingOnWordvectorLong) {
   }
 }
 
-TEST(StringWVecConversion, Conversion) {
+TEST(SuffixArray, Creation) {
   // Test case 1: text with 3 unique chars
   std::string text = "ggtcagtc$";
   unialgo::utils::WordVector wv = unialgo::pattern::StringToBitVector(text);
   EXPECT_EQ(wv.getWordSize(), 3);
   EXPECT_EQ(wv.size(), text.size());
 
-  unialgo::pattern::SuffixArray sa(wv);
+  // unialgo::pattern::SuffixArray sa(wv);
+  unialgo::utils::WordVector sa = unialgo::pattern::makeSuffixArray(wv);
   EXPECT_EQ(sa[0], 8);
   EXPECT_EQ(sa[1], 4);
   EXPECT_EQ(sa[2], 7);
@@ -72,6 +74,16 @@ TEST(StringWVecConversion, Conversion) {
   EXPECT_EQ(sa[6], 1);
   EXPECT_EQ(sa[7], 6);
   EXPECT_EQ(sa[8], 2);
+}
+
+TEST(BWT, Creation) {
+  // Test case 1: text with 3 unique chars
+  std::string text = "ggtcagtc$";
+  unialgo::utils::WordVector wv = unialgo::pattern::StringToBitVector(text);
+  EXPECT_EQ(wv.getWordSize(), 3);
+  EXPECT_EQ(wv.size(), text.size());
+
+  unialgo::pattern::Bwt bwt(wv);
 }
 
 }  // namespace

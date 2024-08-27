@@ -13,8 +13,8 @@ WaveletMatrix::WaveletMatrix(const utils::WordVector& string)
 
   matrix_ = std::make_shared<unialgo::utils::Bitvector>(
       unialgo::utils::Bitvector(string.size() * matrix_depth_));
-  Zs = WordVector(matrix_depth_,
-                  std::ceil(std::log(string.size()) / std::log(2)));
+  Zs_ = WordVector(matrix_depth_,
+                   std::ceil(std::log(string.size()) / std::log(2)));
 
   utils::WordVector::Type bit_to_check = 1 << matrix_depth_ - 1;
   utils::WordVector layer_order = string;
@@ -36,7 +36,7 @@ WaveletMatrix::WaveletMatrix(const utils::WordVector& string)
       }
     }
     // store the zero_count of layer
-    Zs[layer] = zero_count;
+    Zs_[layer] = zero_count;
     // reverse the 1s in backet
     for (std::size_t i = zero_count;
          i < (string.size() - zero_count) / 2 + zero_count; ++i) {
@@ -70,7 +70,7 @@ uint64_t WaveletMatrix::acces(std::size_t indx) const {
     // to get position of 1 in next layer need to skip all the 0s
     pos =
         helper_.rank(layer * string_size_, pos + layer * string_size_, value) +
-        Zs[layer] * value - 1;
+        Zs_[layer] * value - 1;
     bit_to_set = bit_to_set >> 1;
   }
   return res;
@@ -85,9 +85,9 @@ std::size_t WaveletMatrix::rank(const uint64_t character, std::size_t i) const {
     layer_start = layer * string_size_;  // position in bv of first bit in layer
     // if p == 0 can't do p - 1
     if (p > 0) p = helper_.rank(layer_start, p - 1 + layer_start, bit_value);
-    p += (Zs[layer] * bit_value);
+    p += (Zs_[layer] * bit_value);
     i = helper_.rank(layer_start, i + layer_start, bit_value) +
-        (Zs[layer] * bit_value) - 1;
+        (Zs_[layer] * bit_value) - 1;
     if (i + 1 - p == 0) return 0;  // check for overflow of i
     bit_to_set = bit_to_set >> 1;
   }
