@@ -15,17 +15,40 @@ class WaveletMatrix {
  public:
   WaveletMatrix(const unialgo::utils::WordVector& string);
 
+  ~WaveletMatrix() = default;
+
+  WaveletMatrix(const WaveletMatrix&) = default;
+  WaveletMatrix(WaveletMatrix&&) = default;
+
+  WaveletMatrix& operator=(const WaveletMatrix&) = default;
+  WaveletMatrix& operator=(WaveletMatrix&&) = default;
+
   /**
    * @brief Access value in string
    *
    * This is O(log(|alphabet|)) = O(matrix_depth_)
+   * Note: basicly constant since |alphabet| is samll
    *
    * @param indx value to access
    * @return uint64_t bit rapresentation of string[i]
    */
   uint64_t acces(std::size_t indx) const;
 
+  /**
+   * @brief Rank of charachter up to position
+   *
+   * Complexity is O(log(|alphabet|)) = O(matrix_depth)
+   * Note: basicly constant since |alphabet| is samll
+   *
+   * @param character character to count occurrences
+   * @param pos position to end count (included)
+   * @return std::size_t # of occ in [0, character]
+   */
   std::size_t rank(const uint64_t character, std::size_t pos) const;
+  std::size_t rank(const unialgo::utils::WordVectorConstReference character,
+                   std::size_t pos) const;
+  std::size_t rank(const unialgo::utils::WordVectorReference character,
+                   std::size_t pos) const;
 
   void print() const;
 

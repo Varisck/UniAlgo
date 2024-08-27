@@ -36,6 +36,7 @@ class RankHelper {
     init();
   };
 
+  ~RankHelper() = default;
   RankHelper(const RankHelper&) = default;
   RankHelper(RankHelper&&) = default;
   RankHelper& operator=(const RankHelper&) = default;

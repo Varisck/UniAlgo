@@ -19,6 +19,17 @@ target_link_libraries(
   GTest::gtest_main
 )
 
+add_executable(
+  timingWaveletMatrix
+  testTimes.cpp  
+)
+
+target_link_libraries(
+  timingWaveletMatrix
+  unialgo::utils
+  unialgo::pattern
+)
+
 # places tests in separate dir CMAKE_RUNTIME_OUTPUT_DIRECTORY_TESTS
 set_property(TARGET WaveletMatrixTest PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_TESTS})
 add_test(NAME WaveletMatrixTest COMMAND WaveletMatrixTest)

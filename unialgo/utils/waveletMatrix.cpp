@@ -20,8 +20,8 @@ WaveletMatrix::WaveletMatrix(const utils::WordVector& string)
   utils::WordVector layer_order = string;
 
   for (std::size_t layer = 0; layer < matrix_depth_; ++layer) {
-    for (auto a : layer_order) std::cout << a.getValue();
-    std::cout << std::endl;
+    // for (auto a : layer_order) std::cout << a.getValue();
+    // std::cout << std::endl;
 
     utils::WordVector backet(string.size(), string.getWordSize());
     std::size_t zero_count = 0;
@@ -92,6 +92,18 @@ std::size_t WaveletMatrix::rank(const uint64_t character, std::size_t i) const {
     bit_to_set = bit_to_set >> 1;
   }
   return i - p + 1;
+}
+
+std::size_t WaveletMatrix::rank(
+    const unialgo::utils::WordVectorConstReference character,
+    std::size_t pos) const {
+  return rank(character.getValue(), pos);
+}
+
+std::size_t WaveletMatrix::rank(
+    const unialgo::utils::WordVectorReference character,
+    std::size_t pos) const {
+  return rank(character.getValue(), pos);
 }
 
 void WaveletMatrix::print() const {

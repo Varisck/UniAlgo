@@ -32,9 +32,6 @@ TEST(TestingWavelet, Access) {
   EXPECT_EQ(mat.getStringSize(), wv.size());
   EXPECT_EQ(mat.getMatrixDepth(), wv.getWordSize());
 
-  // std::cout << std::endl;
-  // mat.print();
-
   EXPECT_EQ(mat.acces(0), wv[0].getValue());
   EXPECT_EQ(mat.acces(1), wv[1].getValue());
   EXPECT_EQ(mat.acces(3), wv[3].getValue());
@@ -52,21 +49,9 @@ TEST(TestingWavelet, rank) {
   EXPECT_EQ(mat.getStringSize(), wv.size());
   EXPECT_EQ(mat.getMatrixDepth(), wv.getWordSize());
 
-  std::cout << std::endl;
-  mat.print();
-  std::cout << std::endl;
-
-  // std::cout << "4: " << static_cast<unsigned long>(alph['4'])
-  //           << " 3: " << static_cast<unsigned long>(alph['3']) << std::endl;
-
-  std::cout << "rank(4, 2): " << std::endl;
   EXPECT_EQ(mat.rank(alph['4'], 2), 1);
-  std::cout << "rank(3, 2): " << std::endl;
   EXPECT_EQ(mat.rank(alph['3'], 2), 0);
-  std::cout << "rank(4, 9): " << std::endl;
   EXPECT_EQ(mat.rank(alph['4'], 9), 2);
-
-  std::cout << "rank(4, len): " << std::endl;
   EXPECT_EQ(mat.rank(alph['4'], s.length() - 1), 4);
 }
 
@@ -81,13 +66,6 @@ TEST(TestingWavelet, rank2) {
   unialgo::utils::WaveletMatrix mat(wv);
   EXPECT_EQ(mat.getStringSize(), wv.size());
   EXPECT_EQ(mat.getMatrixDepth(), wv.getWordSize());
-
-  std::cout << std::endl;
-  mat.print();
-  std::cout << std::endl;
-
-  // std::cout << "4: " << static_cast<unsigned long>(alph['4'])
-  //           << " 3: " << static_cast<unsigned long>(alph['3']) << std::endl;
 
   auto naiveRank = [s](int pos, char c) {
     int count = 0;
