@@ -10,6 +10,8 @@
 
 namespace {
 
+// ========== Suffix Array ==========
+
 // testing sort on wordvector
 TEST(StringWVecConversion, SortingOnWordvector) {
   unialgo::utils::WordVector wv(10, 5);
@@ -76,6 +78,8 @@ TEST(SuffixArray, Creation) {
   EXPECT_EQ(sa[8], 2);
 }
 
+// ========== BWT ==========
+
 TEST(BWT, Creation) {
   // Test case 1: text with 3 unique chars
   std::string text = "ggtcagtc$";
@@ -84,6 +88,103 @@ TEST(BWT, Creation) {
   EXPECT_EQ(wv.size(), text.size());
 
   unialgo::pattern::Bwt bwt(wv);
+  EXPECT_EQ(wv.getWordSize(), bwt.getWordSize());
+  EXPECT_EQ(wv.size(), bwt.size());
+}
+
+TEST(BWT, accessOperator) {
+  // Test case 1: text with 3 unique chars
+  std::string text = "ggtcagtc$";
+  unialgo::utils::WordVector wv = unialgo::pattern::StringToBitVector(text);
+  EXPECT_EQ(wv.getWordSize(), 3);
+  EXPECT_EQ(wv.size(), text.size());
+
+  unialgo::pattern::Bwt bwt(wv);
+  EXPECT_EQ(wv.getWordSize(), bwt.getWordSize());
+
+  EXPECT_EQ(bwt[0], 2);
+  EXPECT_EQ(bwt[1], 2);
+  EXPECT_EQ(bwt[2], 4);
+  EXPECT_EQ(bwt[3], 4);
+  EXPECT_EQ(bwt[4], 0);
+  EXPECT_EQ(bwt[5], 1);
+  EXPECT_EQ(bwt[6], 3);
+  EXPECT_EQ(bwt[7], 3);
+  EXPECT_EQ(bwt[8], 3);
+}
+
+TEST(BWT, operatorAt) {
+  // Test case 1: text with 3 unique chars
+  std::string text = "ggtcagtc$";
+  unialgo::utils::WordVector wv = unialgo::pattern::StringToBitVector(text);
+  EXPECT_EQ(wv.getWordSize(), 3);
+  EXPECT_EQ(wv.size(), text.size());
+
+  unialgo::pattern::Bwt bwt(wv);
+  EXPECT_EQ(wv.getWordSize(), bwt.getWordSize());
+
+  EXPECT_EQ(bwt.at(0), 2);
+  EXPECT_EQ(bwt.at(1), 2);
+  EXPECT_EQ(bwt.at(2), 4);
+  EXPECT_EQ(bwt.at(3), 4);
+  EXPECT_EQ(bwt.at(4), 0);
+  EXPECT_EQ(bwt.at(5), 1);
+  EXPECT_EQ(bwt.at(6), 3);
+  EXPECT_EQ(bwt.at(7), 3);
+  EXPECT_EQ(bwt.at(8), 3);
+}
+
+TEST(BWT, searchPattern) {
+  std::string text = "ggtcagtc$";
+  auto alph = unialgo::pattern::GetAlphabet(text);
+  unialgo::utils::WordVector wv =
+      unialgo::pattern::StringToBitVector(text, alph);
+
+  EXPECT_EQ(wv.getWordSize(), 3);
+  EXPECT_EQ(wv.size(), text.size());
+
+  unialgo::pattern::Bwt bwt(wv);
+
+  std::string pattern = "gtc";
+  unialgo::utils::WordVector p =
+      unialgo::pattern::StringToBitVector(pattern, alph);
+
+  std::vector<std::size_t> res = bwt.searchPattern(p);
+
+  // position in suffix array where pattern start
+  EXPECT_EQ(res.size(), 2);
+  EXPECT_EQ(res[0], 5);
+  EXPECT_EQ(res[1], 6);
+
+  auto sa = unialgo::pattern::makeSuffixArray(wv);
+
+  EXPECT_EQ(sa[res[1]], 1);
+  EXPECT_EQ(sa[res[0]], 5);
+}
+
+TEST(BWT, searchPatternWithSa) {
+  std::string text = "ggtcagtc$";
+  auto alph = unialgo::pattern::GetAlphabet(text);
+  unialgo::utils::WordVector wv =
+      unialgo::pattern::StringToBitVector(text, alph);
+
+  EXPECT_EQ(wv.getWordSize(), 3);
+  EXPECT_EQ(wv.size(), text.size());
+
+  unialgo::pattern::Bwt bwt(wv);
+
+  std::string pattern = "gtc";
+  auto sa = unialgo::pattern::makeSuffixArray(wv);
+
+  unialgo::utils::WordVector p =
+      unialgo::pattern::StringToBitVector(pattern, alph);
+
+  std::vector<std::size_t> res = bwt.searchPattern(p, sa);
+
+  // position in text where pattern starts
+  EXPECT_EQ(res.size(), 2);
+  EXPECT_EQ(res[0], 5);
+  EXPECT_EQ(res[1], 1);
 }
 
 }  // namespace
