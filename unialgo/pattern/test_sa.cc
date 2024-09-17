@@ -187,4 +187,27 @@ TEST(BWT, searchPatternWithSa) {
   EXPECT_EQ(res[1], 1);
 }
 
+TEST(BWT, searchPatternNoExisting) {
+  std::string text = "ggtcagtc$";
+  auto alph = unialgo::pattern::GetAlphabet(text);
+  unialgo::utils::WordVector wv =
+      unialgo::pattern::StringToBitVector(text, alph);
+
+  EXPECT_EQ(wv.getWordSize(), 3);
+  EXPECT_EQ(wv.size(), text.size());
+
+  unialgo::pattern::Bwt bwt(wv);
+
+  std::string pattern = "gtg";
+  auto sa = unialgo::pattern::makeSuffixArray(wv);
+
+  unialgo::utils::WordVector p =
+      unialgo::pattern::StringToBitVector(pattern, alph);
+
+  std::vector<std::size_t> res = bwt.searchPattern(p, sa);
+
+  // position in text where pattern starts
+  EXPECT_EQ(res.size(), 0);
+}
+
 }  // namespace
