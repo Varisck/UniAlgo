@@ -731,7 +731,7 @@ TEST(TestingWordVector, testingIteratorValueType) {
   EXPECT_EQ(*it2, 1);
 
   unialgo::utils::WordVector::Iterator::value_type val = std::move(*it);
-  ::testing::StaticAssertTypeEq<decltype(val), unsigned long long int>();
+  ::testing::StaticAssertTypeEq<decltype(val), uint64_t>();
   EXPECT_EQ(val, 2);
 
   *it = std::move(*it2);
