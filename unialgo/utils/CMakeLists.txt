@@ -19,13 +19,14 @@ target_link_libraries(
   GTest::gtest_main
 )
 
+## Testing data struct 
 add_executable(
-  timingWaveletMatrix
+  timingDataStruct
   testTimes.cpp  
 )
 
 target_link_libraries(
-  timingWaveletMatrix
+  timingDataStruct
   unialgo::utils
   unialgo::pattern
 )

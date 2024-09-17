@@ -11,9 +11,6 @@
 
 #include "unialgo/utils/bitvector/bitMaps.hpp"
 
-// TODO: put assert() on accessing bit_positions >= num_bits_
-//       note bv.end() access operator[] with num_bits_
-
 namespace unialgo {
 
 namespace utils {

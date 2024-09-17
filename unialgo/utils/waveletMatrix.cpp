@@ -106,17 +106,5 @@ std::size_t WaveletMatrix::rank(
   return rank(character.getValue(), pos);
 }
 
-void WaveletMatrix::print() const {
-  for (std::size_t i = 0; i < matrix_depth_; ++i) {
-    for (std::size_t j = 0; j < string_size_; ++j) {
-      std::cout << (*matrix_)[j + i * string_size_];
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
-  for (int i = 24; i < 48; ++i) std::cout << (*matrix_)[i];
-  std::cout << std::endl;
-}
-
 }  // namespace utils
 }  // namespace unialgo

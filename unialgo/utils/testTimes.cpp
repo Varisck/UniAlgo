@@ -9,10 +9,12 @@
 #include "unialgo/utils/waveletMatrix.hpp"
 
 void readFromFile(std::string& s) {
+  // name of the file with data do build data structure on
+  // this should be a file containing a single string
   std::string filename =
-      "T:\\Progetti\\UniAlgo\\unialgo\\utils\\test.txt";  // Specify the file
-                                                          // name
-  std::ifstream file(filename);                           // Open the file
+      "T:\\Progetti\\UniAlgo\\unialgo\\utils\\dna.txt";  // Specify the file
+                                                         // name
+  std::ifstream file(filename);                          // Open the file
 
   if (file.is_open()) {
     // Read a single string from the file

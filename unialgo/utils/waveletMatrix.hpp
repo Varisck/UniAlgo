@@ -51,8 +51,6 @@ class WaveletMatrix {
   std::size_t rank(const unialgo::utils::WordVectorReference character,
                    std::size_t pos) const;
 
-  void print() const;
-
   std::size_t getStringSize() const;
   std::size_t getMatrixDepth() const;
 
