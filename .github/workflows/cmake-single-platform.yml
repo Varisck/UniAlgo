@@ -30,7 +30,7 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -DCI_ENVIRONMENT=ON
 
     - name: Test
       working-directory: ${{github.workspace}}/build
@@ -40,6 +40,7 @@ jobs:
 
     - name: Upload Test Results
       uses: actions/upload-artifact@v3.2.1-node20
+      if: always()
       with:
         name: ctest-results
         path: build/ctest_output.log
