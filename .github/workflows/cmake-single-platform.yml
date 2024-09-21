@@ -36,5 +36,11 @@ jobs:
       working-directory: ${{github.workspace}}/build
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+      run: ctest -C ${{env.BUILD_TYPE}} --rerun-failed --output-on-failure -O ctest_output.log
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v3.2.1-node20
+      with:
+        name: ctest-results
+        path: build/ctest_output.log
 
