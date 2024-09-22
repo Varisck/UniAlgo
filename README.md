@@ -14,9 +14,15 @@ Here is a list of the namspaces whit some of the main content in them. The top l
   - Data structures for pattern matching
     - Suffix Arrays
     - BWT
+- graph
+  - sparse graph implementation
+  - algorithms on graphs
 - math
   - Dot product using simd
 - Perceptron: class implementing basic perceptron (Rosenblatt)
+
+## Actions
+There is a ci/cd pipeline that is in progress, this now builds with cmake the library and run all the tests creating an artifact with the results.
 
 ## Contributing
 I'm happy to receive and actively encourage code reviews. Constructive feedback not only improves the quality of the code but also provides an excellent opportunity to learn and enhance my understanding of C++, and C++ best practices. Feel free to share your insights, suggestions, and recommendations. 
