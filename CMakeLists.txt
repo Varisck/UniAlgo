@@ -14,6 +14,14 @@ enable_testing()
 
 add_subdirectory(unialgo)
 
+
+option(DEFINE_CI_MACRO_ENV "Compile cmake for ci/cd pipeline" OFF)
+
+if(DEFINE_CI_MACRO_ENV)
+  add_compile_definitions(UNIALGO_CI_ENVIRONMENT_)
+endif(DEFINE_CI_MACRO_ENV)
+
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
