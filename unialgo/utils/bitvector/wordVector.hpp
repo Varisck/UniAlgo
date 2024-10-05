@@ -17,6 +17,7 @@
 // TODO: review all members of WordVectorRef (possibly templated members are not
 // needed)
 // TODO: add cassert for incorrect access?, word_size > 64
+// This is now well written
 
 namespace unialgo {
 namespace utils {

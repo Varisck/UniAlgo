@@ -1,12 +1,15 @@
 #include "unialgo/pattern/suffixArray.hpp"
 
 #include <algorithm>  // std::sort
-#include <cassert>
-#include <cmath>  // std::log, std::ceil
+#include <cassert>    // assert
+#include <cmath>      // std::log, std::ceil
+#include <string>     // std::string
+
+#include "unialgo/pattern/wordVecMatching.hpp"  // unialgo::StringToBitVector
 
 namespace unialgo {
 namespace pattern {
-// // ==== SuffixArray implementation ====
+// ==== SuffixArray implementation ====
 
 utils::WordVector makeSuffixArray(const utils::WordVector& vw) {
   unialgo::utils::WordVector sa;
@@ -23,6 +26,7 @@ utils::WordVector makeSuffixArray(const utils::WordVector& vw) {
   // initialize sa_ with min wordSize required to store indexes
   const std::size_t wordSize = std::ceil(std::log(vw.size()) / std::log(2));
   sa = unialgo::utils::WordVector(vw.size(), wordSize);
+
   // fill sa_ with indexes first element is always the $-suffix
   sa[0] = vw.size() - 1;
   for (std::size_t i = 1; i < sa.size(); ++i) {
@@ -45,6 +49,16 @@ utils::WordVector makeSuffixArray(const utils::WordVector& vw) {
   };
   // order sa_ based on alph. order on suffixes
   std::sort(sa.begin(), sa.end(), cmp);
+  return sa;
+}
+
+utils::WordVector suffix_array_from_string(const std::string& s) {
+  std::string s1 = s + "$$$";
+  auto s1_word_wv = unialgo::pattern::StringToBitVector(s1);
+  unialgo::utils::WordVector sa(s.size(), unialgo::utils::get_log_2(s.size()));
+  std::size_t max_values_in_string = (1 << (s1_word_wv.getWordSize() + 1)) - 1;
+  unialgo::pattern::make_suffix_array(s1_word_wv, sa, s.size(),
+                                      max_values_in_string);
   return sa;
 }
 

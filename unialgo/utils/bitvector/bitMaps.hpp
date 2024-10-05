@@ -3,6 +3,8 @@
 
 #include <stdint.h>  // uint64_t
 
+#include <cmath>  // std::ceil
+
 namespace unialgo {
 
 namespace utils {
@@ -198,7 +200,14 @@ inline uint64_t read_bits(const uint64_t* word, uint8_t offset,
   }
 }
 
-inline uint64_t getLog2(const uint64_t value) { return 0; }
+// turn this into a bit hack
+// inline uint64_t getLog2(const uint64_t value) {
+//   return std::ceil(std::log(value) / std::log(2));
+// }
+
+inline std::size_t get_log_2(const double value) {
+  return std::ceil(std::log(value) / std::log(2));
+}
 
 }  // namespace utils
 }  // namespace unialgo

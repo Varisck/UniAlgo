@@ -59,7 +59,6 @@ TEST(StringWVecConversion, SortingOnWordvectorLong) {
 }
 
 TEST(SuffixArray, Creation) {
-  // Test case 1: text with 3 unique chars
   std::string text = "ggtcagtc$";
   unialgo::utils::WordVector wv = unialgo::pattern::StringToBitVector(text);
   EXPECT_EQ(wv.getWordSize(), 3);
@@ -76,6 +75,47 @@ TEST(SuffixArray, Creation) {
   EXPECT_EQ(sa[6], 1);
   EXPECT_EQ(sa[7], 6);
   EXPECT_EQ(sa[8], 2);
+}
+
+TEST(SuffixArray, linear_time) {
+  std::string text = "mississippi$$$$";
+  unialgo::utils::WordVector wv = unialgo::pattern::StringToBitVector(text);
+  EXPECT_EQ(wv.getWordSize(), 3);
+  EXPECT_EQ(wv.size(), text.size());
+
+  // unialgo::pattern::SuffixArray sa(wv);
+  unialgo::utils::WordVector sa(10, unialgo::utils::get_log_2(wv.size()));
+  unialgo::pattern::make_suffix_array(wv, sa, 11,
+                                      (1 << (wv.getWordSize() + 1)) - 1);
+  EXPECT_EQ(sa[0], 10);
+  EXPECT_EQ(sa[1], 7);
+  EXPECT_EQ(sa[2], 4);
+  EXPECT_EQ(sa[3], 1);
+  EXPECT_EQ(sa[4], 0);
+  EXPECT_EQ(sa[5], 9);
+  EXPECT_EQ(sa[6], 8);
+  EXPECT_EQ(sa[7], 6);
+  EXPECT_EQ(sa[8], 3);
+  EXPECT_EQ(sa[9], 5);
+  EXPECT_EQ(sa[10], 2);
+}
+
+TEST(SuffixArray, sa_from_string) {
+  std::string text = "mississippi";
+  unialgo::utils::WordVector sa =
+      unialgo::pattern::suffix_array_from_string(text);
+
+  EXPECT_EQ(sa[0], 10);
+  EXPECT_EQ(sa[1], 7);
+  EXPECT_EQ(sa[2], 4);
+  EXPECT_EQ(sa[3], 1);
+  EXPECT_EQ(sa[4], 0);
+  EXPECT_EQ(sa[5], 9);
+  EXPECT_EQ(sa[6], 8);
+  EXPECT_EQ(sa[7], 6);
+  EXPECT_EQ(sa[8], 3);
+  EXPECT_EQ(sa[9], 5);
+  EXPECT_EQ(sa[10], 2);
 }
 
 // ========== BWT ==========
