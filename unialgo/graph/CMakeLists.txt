@@ -1,5 +1,5 @@
 add_library("graph" INTERFACE)
-target_sources("graph" PUBLIC "node.hpp" "graph.hpp")
+target_sources("graph" PUBLIC "node.hpp" "graph.hpp" "algorithms.hpp")
 add_library(unialgo::graph ALIAS "graph")
 
 # tests: 

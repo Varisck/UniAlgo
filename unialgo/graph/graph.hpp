@@ -1,7 +1,9 @@
 #ifndef UNIALGO_GRAPH_GRAPH_
 #define UNIALGO_GRAPH_GRAPH_
 
+#include <limits>         // std::numeric_limits
 #include <memory>         // std::shared_ptr, std::weak_ptr
+#include <stdexcept>      // std::out_of_range
 #include <unordered_map>  // std::unordered_map
 
 #include "unialgo/graph/node.hpp"  // node class
@@ -111,6 +113,8 @@ class Graph {
   // count (? == contains)
   // find based on data (? maybe with pred?)
 
+  // function to remove dangling wead_ptrs
+
   /*
    *    ==== Modifiers ====
    */
@@ -184,8 +188,8 @@ class Graph {
    * @return iterator following the last removed element.
    */
   iterator erase(iterator pos) { return nodes_.erase(pos); }
-  iterator erase(const Key& k) { return nodes_.erase(k); }
-  iterator erase(Key&& k) { return nodes_.erase(std::move(k)); }
+  size_type erase(const Key& k) { return nodes_.erase(k); }
+  size_type erase(Key&& k) { return nodes_.erase(std::move(k)); }
 
   // clear
   // merge
@@ -271,6 +275,39 @@ class Graph {
   }
 
   /**
+   * @brief Access to edge value with const qualifier for *this. If no such
+   * element exists, an exception of type std::out_of_range is thrown.
+   *
+   * @param k1 const reference to key1
+   * @param k2 const reference to key2
+   * @return Cost cost of edge if the edge exist otherwise max_cost_
+   */
+  Cost operator()(const Key& k1, const Key& k2) const {
+    const_iterator n1 = find(k1);
+    const_iterator n2 = find(k2);
+    if (n1 == end() || n2 == end())
+      throw std::out_of_range(
+          "Key is out of range for unialgo::graph::operator()");
+    return operator()(n1, n2);
+  }
+
+  /**
+   * @brief Access to edge value with const qualifier for *this. If no such
+   * element exists, an exception of type std::out_of_range is thrown.
+   *
+   * @param n1 const iterator to node1
+   * @param n2 const iterator to node2
+   * @return Cost cost of edge if the edge exist otherwise max_cost_
+   */
+  Cost operator()(const_iterator n1, const_iterator n2) const {
+    NodeIterator edge = n1->second->find(n2->second);  // check if edge exist
+    if (edge != n1->second->end()) {
+      return edge->cost();  // return existing edge cost
+    }
+    throw std::out_of_range("Edge not in graph for unialgo::graph::operator()");
+  }
+
+  /**
    * @brief Remove the edge between n1 and n2
    *
    * @details if the graph is undirected also removes the backward edge
@@ -341,6 +378,8 @@ class Graph {
    * @return GraphType type of graph (directed / undirected)
    */
   GraphType get_graph_type() const noexcept { return GT; }
+
+  Cost get_max_cost() const noexcept { return max_cost_; }
 
   /*
    *    ==== Iterators ====

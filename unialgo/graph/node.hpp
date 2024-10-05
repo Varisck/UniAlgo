@@ -42,7 +42,7 @@ class Node {
      */
     std::weak_ptr<Node> get_node_ptr() { return node_to_; }
 
-    friend class Node<Data, Key, Cost>;
+    friend class Node<Key, Data, Cost>;
 
    private:
     std::shared_ptr<Cost> cost_;   // pointer to edge's cost
