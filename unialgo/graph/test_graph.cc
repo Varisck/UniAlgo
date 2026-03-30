@@ -5,6 +5,7 @@
 #include <memory>   // std::shared_ptr
 #include <utility>  // std::swap
 
+#include "unialgo/graph/adjGraph.hpp"
 #include "unialgo/graph/algorithms.hpp"
 #include "unialgo/graph/graph.hpp"
 
@@ -262,6 +263,34 @@ TEST(TestingGraphAlgorithms, prim) {
   EXPECT_EQ(mst(6, 5), 4);
   EXPECT_EQ(mst.is_edge(3, 7), true);
   EXPECT_EQ(mst(3, 7), 6);
+}
+
+// ============= AdjGraph.hpp =============
+
+TEST(TestingAdjGraph, constructino) {
+  unialgo::graph::UndirectedGraph<int, int> g;
+
+  g[1] = 1;
+  g[2] = 2;
+  g[3] = 3;
+  g[4] = 4;
+  g[5] = 5;
+  g[6] = 6;
+  g[7] = 7;
+
+  g(1, 2) = 5;
+  g(1, 4) = 17;
+  g(2, 4) = 12;
+  g(2, 3) = 13;
+  g(2, 6) = 8;
+  g(3, 7) = 6;
+  g(4, 5) = 10;
+  g(5, 6) = 4;
+  g(6, 4) = 8;
+  g(6, 3) = 11;
+  g(6, 7) = 14;
+
+  unialgo::graph::AdjMatrix<int, int> m(g);
 }
 
 }  // namespace

@@ -1,6 +1,7 @@
 #include "unialgo/pattern/bwt.hpp"
 
 #include "unialgo/pattern/suffixArray.hpp"
+#include "unialgo/pattern/wordVecMatching.hpp"  // unialgo::StringToBitVector
 
 namespace unialgo {
 namespace pattern {
@@ -31,6 +32,15 @@ Bwt::Bwt(const unialgo::utils::WordVector& text) {
   // return sa (sa[i] index where the i-th suffix start)
   unialgo::utils::WordVector sa = unialgo::pattern::makeSuffixArray(text);
   *this = Bwt(text, sa);
+}
+
+Bwt::Bwt(const std::string& text) {
+  // return sa (sa[i] index where the i-th suffix start)
+  // unialgo::utils::WordVector sa = unialgo::pattern::makeSuffixArray(text);
+  auto text_wv = unialgo::pattern::StringToBitVector(text);
+  unialgo::utils::WordVector sa =
+      unialgo::pattern::suffix_array_from_string(text);
+  *this = Bwt(text_wv, sa);
 }
 
 std::size_t Bwt::getWordSize() const { return occ_.getMatrixDepth() - 1; }

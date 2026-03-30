@@ -307,6 +307,20 @@ class Graph {
     throw std::out_of_range("Edge not in graph for unialgo::graph::operator()");
   }
 
+#if __cplusplus >= 202300L
+  /**
+   * @brief Access to edge value with const qualifier for *this. If no such
+   * element exists, an exception of type std::out_of_range is thrown.
+   *
+   * @param k1 const reference to key1
+   * @param k2 const reference to key2
+   * @return Cost cost of edge if the edge exist otherwise max_cost_
+   */
+  double operator[](const Key& k1, const Key& k2) const {
+    return operator()(k1, k2);
+  }
+#endif
+
   /**
    * @brief Remove the edge between n1 and n2
    *

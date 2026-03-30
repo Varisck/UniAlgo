@@ -228,16 +228,37 @@ class WordVectorRef {
     return *this;
   }
 
-  // this needs reviewing
   WordVectorRef& operator=(const WordVectorRef& other) {
     if constexpr (!std::is_const_v<Reference_type>) {
       utils::write_bits(value_, other.getValue(), position_, word_size_);
+    } else {
+      word_size_ = other.word_size_;
+      value_ = other.value_;
+      position_ = other.position_;
     }
     return *this;
   }
 
   WordVectorRef& operator=(WordVectorRef&& other) {
-    utils::write_bits(value_, other.getValue(), position_, word_size_);
+    if constexpr (!std::is_const_v<Reference_type>) {
+      utils::write_bits(value_, other.getValue(), position_, word_size_);
+    } else {
+      word_size_ = other.word_size_;
+      value_ = other.value_;
+      position_ = other.position_;
+    }
+    return *this;
+  }
+
+  template <typename U>
+  WordVectorRef& operator=(const WordVectorRef<U>& other) {
+    if constexpr (!std::is_const_v<Reference_type>) {
+      utils::write_bits(value_, other.getValue(), position_, word_size_);
+    } else {
+      word_size_ = other.getWordSize();
+      value_ = other.getValuePointer();
+      position_ = other.getPosition();
+    }
     return *this;
   }
 
@@ -578,19 +599,19 @@ struct hash<unialgo::utils::WordVectorRef<Reference_type>> {
   }
 };
 
-// swap two references of wordVector
-// this should not be overloaded inside std (remove this sooner or later)
+// swap overloads for proxy references — necessary because std::swap uses
+// moves which break proxy semantics (the temporary reads from the original
+// location after it's been overwritten). This is technically UB but is
+// standard practice for proxy references (e.g. libstdc++ vector<bool>).
 template <typename Reference_type>
 inline void swap(unialgo::utils::WordVectorRef<Reference_type>& a,
                  unialgo::utils::WordVectorRef<Reference_type>& b) {
   a.swap(b);
 }
 
-// swap two iterators of wordVector
-// this should not be overloaded inside std (remove this sooner or later)
 inline void iter_swap(unialgo::utils::WordVector::Iterator a,
                       unialgo::utils::WordVector::Iterator b) {
-  std::swap(*a, *b);
+  (*a).swap(*b);
 }
 
 }  // namespace std

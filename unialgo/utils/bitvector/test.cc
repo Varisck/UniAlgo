@@ -498,83 +498,80 @@ TEST(TestingWordVector, compareRefValues) {
   EXPECT_TRUE(wv[3] >= wv[2]);
 }
 
-// TEST(TestingWordVector, refAssignmentOp) {
-//   unialgo::utils::WordVector wv(10);
+TEST(TestingWordVector, refAssignmentOp) {
+  unialgo::utils::WordVector wv(10);
 
-//   wv[0] = 0;
-//   wv[1] = 1;
-//   wv[2] = 2;
-//   wv[3] = 3;
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
 
-//   EXPECT_EQ(wv[0], 0);
-//   EXPECT_EQ(wv[1], 1);
-//   EXPECT_EQ(wv[2], 2);
-//   EXPECT_EQ(wv[3], 3);
-//   for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
 
-//   unialgo::utils::WordVectorConstReference a(wv[1]);
-//   // a = wv[1];
-//   wv[0] = a;
-//   // wv[0] = wv[1];
-//   EXPECT_EQ(wv[0], 1);
-//   EXPECT_EQ(wv[1], 1);
-//   // wv[2] = *(++wv.begin());
-//   wv[2] = wv[1];
-//   EXPECT_EQ(wv[2], 1);
-//   EXPECT_EQ(wv[3], 3);
-// }
+  unialgo::utils::WordVectorConstReference a(wv[1]);
+  wv[0] = a;
+  EXPECT_EQ(wv[0], 1);
+  EXPECT_EQ(wv[1], 1);
+  wv[2] = wv[1];
+  EXPECT_EQ(wv[2], 1);
+  EXPECT_EQ(wv[3], 3);
+}
 
-// // testing all combination of operator= on wordvectorreference
-// TEST(TestingWordVector, refAssignmentOpAll) {
-//   unialgo::utils::WordVector wv(10);
-//   wv[0] = 0;
-//   wv[1] = 1;
-//   wv[2] = 2;
-//   wv[3] = 3;
+// testing all combination of operator= on wordvectorreference
+TEST(TestingWordVector, refAssignmentOpAll) {
+  unialgo::utils::WordVector wv(10);
+  wv[0] = 0;
+  wv[1] = 1;
+  wv[2] = 2;
+  wv[3] = 3;
 
-//   EXPECT_EQ(wv[0], 0);
-//   EXPECT_EQ(wv[1], 1);
-//   EXPECT_EQ(wv[2], 2);
-//   EXPECT_EQ(wv[3], 3);
-//   for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
+  EXPECT_EQ(wv[0], 0);
+  EXPECT_EQ(wv[1], 1);
+  EXPECT_EQ(wv[2], 2);
+  EXPECT_EQ(wv[3], 3);
+  for (int i = 4; i < 10; ++i) EXPECT_EQ(wv[i], 0);
 
-//   // changing value and checking if reference is updated:
-//   unialgo::utils::WordVectorConstReference a(wv[1]);
-//   EXPECT_EQ(a, 1);
-//   wv[1] = 0;
-//   EXPECT_EQ(a, 0);
-//   wv[1] = 1;
+  // changing value and checking if reference is updated:
+  unialgo::utils::WordVectorConstReference a(wv[1]);
+  EXPECT_EQ(a, 1);
+  wv[1] = 0;
+  EXPECT_EQ(a, 0);
+  wv[1] = 1;
 
-//   wv[7] = wv[1];
-//   EXPECT_EQ(wv[7], 1);
+  wv[7] = wv[1];
+  EXPECT_EQ(wv[7], 1);
 
-//   // assigning rvalue to lvalue reference const and non const:
-//   unialgo::utils::WordVectorReference b(wv[1]);
-//   EXPECT_EQ(b, 1);
-//   wv[0] = b;
-//   EXPECT_EQ(wv[0], 1);
-//   wv[0] = 0;
-//   EXPECT_EQ(wv[0], 0);
-//   wv[0] = a;
-//   EXPECT_EQ(wv[0], 1);
+  // assigning rvalue to lvalue reference const and non const:
+  unialgo::utils::WordVectorReference b(wv[1]);
+  EXPECT_EQ(b, 1);
+  wv[0] = b;
+  EXPECT_EQ(wv[0], 1);
+  wv[0] = 0;
+  EXPECT_EQ(wv[0], 0);
+  wv[0] = a;
+  EXPECT_EQ(wv[0], 1);
 
-//   // creating reference assiging value and checking if value updates in wv:
-//   unialgo::utils::WordVectorReference c = wv[2];
-//   EXPECT_EQ(c, 2);
-//   c = a;
-//   EXPECT_EQ(c, 1);
-//   EXPECT_EQ(wv[2], 1);
+  // creating reference assigning value and checking if value updates in wv:
+  unialgo::utils::WordVectorReference c = wv[2];
+  EXPECT_EQ(c, 2);
+  c = a;
+  EXPECT_EQ(c, 1);
+  EXPECT_EQ(wv[2], 1);
 
-//   // creating const reference and assigning reference
-//   // checking referenced value is changed in obj but value
-//   // is not updated in wv:
-//   wv[5] = 2;
-//   unialgo::utils::WordVectorConstReference d = wv[5];
-//   EXPECT_EQ(d, 2);
-//   d = b;
-//   EXPECT_EQ(d, 1);
-//   EXPECT_EQ(wv[5], 2);
-// }
+  // creating const reference and assigning reference
+  // const ref operator= rebinds (like re-seating a pointer-to-const)
+  // so d now points to where b points, wv[5] is unchanged:
+  wv[5] = 2;
+  unialgo::utils::WordVectorConstReference d = wv[5];
+  EXPECT_EQ(d, 2);
+  d = b;
+  EXPECT_EQ(d, 1);
+  EXPECT_EQ(wv[5], 2);
+}
 
 // testing iterator assignment
 TEST(TestingWordVector, iteratorAssignment) {

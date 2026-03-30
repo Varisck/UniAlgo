@@ -174,6 +174,23 @@ TEST(BWT, operatorAt) {
   EXPECT_EQ(bwt.at(8), 3);
 }
 
+TEST(BWT, construction_from_string) {
+  // Test case 1: text with 3 unique chars
+  std::string text = "ggtcagtc$";
+
+  unialgo::pattern::Bwt bwt(text);
+
+  EXPECT_EQ(bwt.at(0), 2);
+  EXPECT_EQ(bwt.at(1), 2);
+  EXPECT_EQ(bwt.at(2), 4);
+  EXPECT_EQ(bwt.at(3), 4);
+  EXPECT_EQ(bwt.at(4), 0);
+  EXPECT_EQ(bwt.at(5), 1);
+  EXPECT_EQ(bwt.at(6), 3);
+  EXPECT_EQ(bwt.at(7), 3);
+  EXPECT_EQ(bwt.at(8), 3);
+}
+
 TEST(BWT, searchPattern) {
   std::string text = "ggtcagtc$";
   auto alph = unialgo::pattern::GetAlphabet(text);

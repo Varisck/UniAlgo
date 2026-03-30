@@ -20,7 +20,20 @@ namespace pattern {
 class Bwt {
  public:
   /**
+   * @brief Construct a new Bwt object from a string text
+   *
+   * @details the text has to be $-terminated
+   *
+   * @details suffix_array construction in linear time
+   *
+   * @param text string of text to construct bwt from
+   */
+  Bwt(const std::string& text);
+
+  /**
    * @brief Construct a new Bwt object
+   *
+   * @details the text has to be $-terminated
    *
    * @param text WordVector to construct btw from
    */
@@ -28,6 +41,8 @@ class Bwt {
 
   /**
    * @brief Construct a new Bwt object
+   *
+   * @details the text has to be $-terminated
    *
    * @param text WordVector to construct btw from
    * @param sa suffix array of text
