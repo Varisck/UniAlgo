@@ -60,6 +60,7 @@ class WaveletMatrix {
   std::shared_ptr<unialgo::utils::Bitvector> matrix_;  // bitvector for matrix_
   unialgo::utils::RankHelper helper_;  // helper for constant rank on bv
   unialgo::utils::WordVector Zs_;      // #0s in layerss
+  std::vector<std::size_t> level_offsets_;  // precomputed layer * string_size_
 };  // class WaveletMatrix
 
 }  // namespace utils

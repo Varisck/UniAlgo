@@ -140,6 +140,13 @@ class Bitvector {
   std::vector<Type> getBitVec() const;
 
   /**
+   * @brief Direct access to underlying word array
+   *
+   * @return const Type* pointer to first word
+   */
+  const Type* data() const { return bits_.data(); }
+
+  /**
    * @brief Bitwise and on bitvector
    *
    * @param bv Bitvector

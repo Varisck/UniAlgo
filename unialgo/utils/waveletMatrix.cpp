@@ -50,6 +50,10 @@ WaveletMatrix::WaveletMatrix(const utils::WordVector& string)
   }
 
   helper_ = utils::RankHelper(matrix_);
+
+  level_offsets_.resize(matrix_depth_);
+  for (std::size_t l = 0; l < matrix_depth_; ++l)
+    level_offsets_[l] = l * string_size_;
 }
 
 std::size_t WaveletMatrix::getMatrixDepth() const { return matrix_depth_; }
@@ -62,15 +66,14 @@ uint64_t WaveletMatrix::acces(std::size_t indx) const {
   std::size_t pos = indx;  // this is relative to layers and not bv
 
   for (std::size_t layer = 0; layer < matrix_depth_; ++layer) {
-    bool value = (*matrix_)[pos + layer * string_size_].getValue();
+    std::size_t lo = level_offsets_[layer];
+    bool value = (*matrix_)[pos + lo].getValue();
 
     // conditionaly set or clear bit (bit hacks)
     res ^= (-value ^ res) & bit_to_set;
     // if value = 1 need to add to position count of 0s in layer
     // to get position of 1 in next layer need to skip all the 0s
-    pos =
-        helper_.rank(layer * string_size_, pos + layer * string_size_, value) +
-        Zs_[layer] * value - 1;
+    pos = helper_.rank(lo, pos + lo, value) + Zs_[layer] * value - 1;
     bit_to_set = bit_to_set >> 1;
   }
   return res;
@@ -82,7 +85,7 @@ std::size_t WaveletMatrix::rank(const uint64_t character, std::size_t i) const {
   std::size_t layer_start;
   for (std::size_t layer = 0; layer < matrix_depth_; ++layer) {
     bool bit_value = character & bit_to_set;  // bit value of char at level
-    layer_start = layer * string_size_;  // position in bv of first bit in layer
+    layer_start = level_offsets_[layer];  // position in bv of first bit in layer
     // if p == 0 can't do p - 1
     if (p > 0) p = helper_.rank(layer_start, p - 1 + layer_start, bit_value);
     p += (Zs_[layer] * bit_value);

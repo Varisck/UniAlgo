@@ -3,9 +3,8 @@
 
 #include <stdint.h>  // uint64_t
 
-#include <cmath>          // std::pow, std::log, std::ceil
-#include <memory>         // shared_ptr
-#include <unordered_map>  // std::unordered_map
+#include <cmath>    // std::pow, std::log, std::ceil
+#include <memory>   // shared_ptr
 
 #include "unialgo/utils/bitvector/bitvector.hpp"
 #include "unialgo/utils/bitvector/wordVector.hpp"
@@ -45,36 +44,46 @@ class RankHelper {
   /**
    * @brief Rank helper for bitvector
    *
-   * Rank is constant in time O(1)
-   *
-   * Note: when indx is over the last element of the second layer implementation
-   * is O(log(n) / 2) (very rare case!)
+   * Rank is O(1): two table lookups + popcount on at most
+   * size_second_ bits for the intra-block remainder.
    *
    * @param indx index (must be valid)
-   * @return std::size_t # of bits set to 1 [0, indx] (returns 0 if pointer
+   * @return std::size_t # of bits set to 1 in [0, indx] (returns 0 if pointer
    * = nullptr)
    */
   std::size_t rank(std::size_t indx) const {
-    // assert()
     if (bv_ptr_.get() == nullptr) return 0;
-    if (indx % size_first_ == 0) return first_[indx / size_first_];
-    if (indx % size_second_ == 0)
-      return first_[indx / size_first_] + second_[indx / size_second_];
-    // constant except when indx is over the last element of the second layer
-    if (size_second_ * (indx / size_second_) + size_second_ - 1 <
-        bv_ptr_->getNumBits()) {
-      auto bv = bv_ptr_->operator()(
-          size_second_ * (indx / size_second_) + 1,
-          size_second_ * (indx / size_second_) + size_second_ - 1);
-      return first_[indx / size_first_] + second_[indx / size_second_] +
-             t_.at(bv)[indx % size_second_ - 1];
-    } else {
-      std::size_t count = 0;
-      for (std::size_t i = size_second_ * (indx / size_second_) + 1; i <= indx;
-           ++i)
-        if (bv_ptr_->GetBit(i)) ++count;
-      return first_[indx / size_first_] + second_[indx / size_second_] + count;
+
+    std::size_t count = first_[indx / size_first_].getValue() +
+                        second_[indx / size_second_].getValue();
+
+    // Count remaining bits from second-layer boundary to indx using popcount
+    std::size_t block_start = (indx / size_second_) * size_second_;
+    if (block_start == indx) return count;
+
+    const auto* data = bv_ptr_->data();
+    for (std::size_t i = block_start + 1; i <= indx;) {
+      std::size_t word_idx = i / Bitvector::type_size;
+      std::size_t bit_offset = i % Bitvector::type_size;
+
+      uint64_t word = data[word_idx];
+      // How many bits remain in this word that we care about
+      std::size_t bits_left = indx - i + 1;
+      std::size_t bits_in_word = Bitvector::type_size - bit_offset;
+
+      if (bits_left < bits_in_word) {
+        // Mask: keep only bits from bit_offset to bit_offset + bits_left - 1
+        word = (word >> bit_offset) & ((1ULL << bits_left) - 1);
+        count += __builtin_popcountll(word);
+        break;
+      } else {
+        // Count all bits from bit_offset to end of word
+        word = word >> bit_offset;
+        count += __builtin_popcountll(word);
+        i += bits_in_word;
+      }
     }
+    return count;
   }
 
   /**
@@ -141,7 +150,6 @@ class RankHelper {
    *
    */
   void init() {
-    std::size_t size_wv_word = std::ceil(std::log(size_second_) / std::log(2));
     for (std::size_t i = 0; i < bv_ptr_->size(); ++i) {
       if (bv_ptr_->GetBit(i)) {
         ++first_[std::ceil(static_cast<double>(i) / size_first_)];
@@ -153,21 +161,8 @@ class RankHelper {
       if (i % size_second_ == 0) {
         // reset counter if aligned with first level
         if (i % size_first_ == 0) second_[i / size_second_] = 0;
-        if ((i / size_second_ + 1) < second_.size()) {
-          // brings count forward
+        if ((i / size_second_ + 1) < second_.size())
           second_[i / size_second_ + 1] = second_[i / size_second_];
-          // populate hasmap
-          auto bv = bv_ptr_->operator()(i + 1, i + size_second_ - 1);
-          if (t_.find(bv) == t_.end()) {
-            utils::WordVector wv(size_second_ - 1, size_wv_word);
-            wv[0] = bv[0].getValue();
-            for (std::size_t j = 1; j < bv.getNumBits(); ++j) {
-              wv[j] = wv[j - 1];
-              if (bv.at(j) == 1) ++wv[j];
-            }
-            t_.emplace(bv, wv);
-          }
-        }
       }
     }
   }
@@ -202,21 +197,6 @@ class RankHelper {
         std::cout << "  ";
     }
     std::cout << std::endl;
-
-    std::cout << "Hashmap: " << std::endl;
-
-    for (auto it = t_.begin(); it != t_.end(); ++it) {
-      std::cout << "Key: ";
-      for (int i = 0; i < it->first.size(); ++i) {
-        std::cout << it->first[i];
-      }
-      std::cout << ": ";
-      for (int i = 0; i < it->second.size(); ++i) {
-        std::cout << it->second[i].getValue() << " ";
-      }
-      std::cout << std::endl;
-    }
-    std::cout << std::endl;
   }
 
  private:
@@ -226,10 +206,6 @@ class RankHelper {
   // layers of count
   unialgo::utils::WordVector first_;
   unialgo::utils::WordVector second_;
-  std::unordered_map<unialgo::utils::Bitvector, unialgo::utils::WordVector>
-      t_;  // hashmap for 3 layer instant lookup
-           // <bitvector between 2 second layer values, array with count at
-           // position relative to key>
 
   std::size_t size_first_;   // first layer's block size
   std::size_t size_second_;  // second layer's block size
