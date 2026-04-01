@@ -1,7 +1,6 @@
 #ifndef UNIALGO_UTILS_WAVELET_MATRIX_
 #define UNIALGO_UTILS_WAVELET_MATRIX_
 
-#include <memory>  // std::shared_ptr
 #include <vector>  // std::vector
 
 #include "unialgo/utils/bitvector/bitvector.hpp"
@@ -18,11 +17,11 @@ class WaveletMatrix {
 
   ~WaveletMatrix() = default;
 
-  WaveletMatrix(const WaveletMatrix&) = default;
-  WaveletMatrix(WaveletMatrix&&) = default;
+  WaveletMatrix(const WaveletMatrix& other);
+  WaveletMatrix(WaveletMatrix&& other) noexcept;
 
-  WaveletMatrix& operator=(const WaveletMatrix&) = default;
-  WaveletMatrix& operator=(WaveletMatrix&&) = default;
+  WaveletMatrix& operator=(const WaveletMatrix& other);
+  WaveletMatrix& operator=(WaveletMatrix&& other) noexcept;
 
   /**
    * @brief Access value in string
@@ -55,11 +54,13 @@ class WaveletMatrix {
   std::size_t getMatrixDepth() const;
 
  private:
-  std::size_t string_size_;                            // size of the string
-  std::size_t matrix_depth_;                           // depth of the matrix
-  std::shared_ptr<unialgo::utils::Bitvector> matrix_;  // bitvector for matrix_
-  unialgo::utils::RankHelper helper_;  // helper for constant rank on bv
-  unialgo::utils::WordVector Zs_;      // #0s in layerss
+  void initHelper();  // builds helper_ from matrix_
+
+  std::size_t string_size_;                 // size of the string
+  std::size_t matrix_depth_;                // depth of the matrix
+  unialgo::utils::Bitvector matrix_;        // bitvector for matrix_
+  unialgo::utils::RankHelper helper_;       // helper for constant rank on bv
+  unialgo::utils::WordVector Zs_;           // #0s in layerss
   std::vector<std::size_t> level_offsets_;  // precomputed layer * string_size_
 };  // class WaveletMatrix
 

@@ -1,7 +1,8 @@
 #include "unialgo/utils/waveletMatrix.hpp"
 
-#include <cmath>   // std::ceil
-#include <vector>  // std::vector
+#include <cmath>    // std::ceil
+#include <memory>   // std::shared_ptr
+#include <vector>   // std::vector
 
 namespace unialgo {
 namespace utils {
@@ -11,24 +12,20 @@ WaveletMatrix::WaveletMatrix(const utils::WordVector& string)
   // matrix_depth_ = len_alphabet, assume len alphabet is wordSize
   matrix_depth_ = string.getWordSize();
 
-  matrix_ = std::make_shared<unialgo::utils::Bitvector>(
-      unialgo::utils::Bitvector(string.size() * matrix_depth_));
+  matrix_ = unialgo::utils::Bitvector(string.size() * matrix_depth_);
   Zs_ = WordVector(matrix_depth_,
                    std::ceil(std::log(string.size()) / std::log(2)));
 
-  utils::WordVector::Type bit_to_check = 1 << matrix_depth_ - 1;
+  utils::WordVector::Type bit_to_check = 1 << (matrix_depth_ - 1);
   utils::WordVector layer_order = string;
 
   for (std::size_t layer = 0; layer < matrix_depth_; ++layer) {
-    // for (auto a : layer_order) std::cout << a.getValue();
-    // std::cout << std::endl;
-
     utils::WordVector backet(string.size(), string.getWordSize());
     std::size_t zero_count = 0;
 
     for (std::size_t i = 0; i < string.size(); ++i) {
       if (layer_order[i].getValue() & bit_to_check) {
-        (*matrix_)[i + string.size() * layer] = 1;
+        matrix_[i + string.size() * layer] = 1;
         backet[string.size() - 1 - (i - zero_count)] = layer_order[i];
       } else {
         backet[zero_count] = layer_order[i];
@@ -49,11 +46,61 @@ WaveletMatrix::WaveletMatrix(const utils::WordVector& string)
     bit_to_check = bit_to_check >> 1;
   }
 
-  helper_ = utils::RankHelper(matrix_);
+  initHelper();
 
   level_offsets_.resize(matrix_depth_);
   for (std::size_t l = 0; l < matrix_depth_; ++l)
     level_offsets_[l] = l * string_size_;
+}
+
+void WaveletMatrix::initHelper() {
+  // moved-from objects have empty storage but stale num_bits_ — check raw data
+  // (RankHelper's constructor uses log(size) which is undefined for size=0)
+  if (matrix_.data() == nullptr) return;
+  helper_ = utils::RankHelper(
+      std::shared_ptr<utils::Bitvector>(&matrix_, [](utils::Bitvector*) {}));
+}
+
+WaveletMatrix::WaveletMatrix(const WaveletMatrix& other)
+    : string_size_(other.string_size_),
+      matrix_depth_(other.matrix_depth_),
+      matrix_(other.matrix_),
+      Zs_(other.Zs_),
+      level_offsets_(other.level_offsets_) {
+  initHelper();
+}
+
+WaveletMatrix::WaveletMatrix(WaveletMatrix&& other) noexcept
+    : string_size_(other.string_size_),
+      matrix_depth_(other.matrix_depth_),
+      matrix_(std::move(other.matrix_)),
+      Zs_(std::move(other.Zs_)),
+      level_offsets_(std::move(other.level_offsets_)) {
+  initHelper();
+}
+
+WaveletMatrix& WaveletMatrix::operator=(const WaveletMatrix& other) {
+  if (this != &other) {
+    string_size_ = other.string_size_;
+    matrix_depth_ = other.matrix_depth_;
+    matrix_ = other.matrix_;
+    Zs_ = other.Zs_;
+    level_offsets_ = other.level_offsets_;
+    initHelper();
+  }
+  return *this;
+}
+
+WaveletMatrix& WaveletMatrix::operator=(WaveletMatrix&& other) noexcept {
+  if (this != &other) {
+    string_size_ = other.string_size_;
+    matrix_depth_ = other.matrix_depth_;
+    matrix_ = std::move(other.matrix_);
+    Zs_ = std::move(other.Zs_);
+    level_offsets_ = std::move(other.level_offsets_);
+    initHelper();
+  }
+  return *this;
 }
 
 std::size_t WaveletMatrix::getMatrixDepth() const { return matrix_depth_; }
@@ -62,12 +109,12 @@ std::size_t WaveletMatrix::getStringSize() const { return string_size_; }
 
 uint64_t WaveletMatrix::acces(std::size_t indx) const {
   uint64_t res = 0;
-  uint64_t bit_to_set = 1 << matrix_depth_ - 1;
+  uint64_t bit_to_set = 1 << (matrix_depth_ - 1);
   std::size_t pos = indx;  // this is relative to layers and not bv
 
   for (std::size_t layer = 0; layer < matrix_depth_; ++layer) {
     std::size_t lo = level_offsets_[layer];
-    bool value = (*matrix_)[pos + lo].getValue();
+    bool value = matrix_[pos + lo].getValue();
 
     // conditionaly set or clear bit (bit hacks)
     res ^= (-value ^ res) & bit_to_set;
@@ -80,7 +127,7 @@ uint64_t WaveletMatrix::acces(std::size_t indx) const {
 }
 
 std::size_t WaveletMatrix::rank(const uint64_t character, std::size_t i) const {
-  uint64_t bit_to_set = 1 << matrix_depth_ - 1;
+  uint64_t bit_to_set = 1 << (matrix_depth_ - 1);
   std::size_t p = 0;
   std::size_t layer_start;
   for (std::size_t layer = 0; layer < matrix_depth_; ++layer) {
