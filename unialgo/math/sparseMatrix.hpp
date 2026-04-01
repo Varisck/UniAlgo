@@ -1,10 +1,12 @@
 #ifndef UNIALGO_MATH_SPARSEMATRIX_
 #define UNIALGO_MATH_SPARSEMATRIX_
 
-#include <iostream>       // std::cout DEBUG
-#include <unordered_map>  // std::unordered_map
-#include <utility>        // std::pair
-#include <vector>         // std::vector
+#include <iostream>     // std::cout DEBUG
+#include <type_traits>  // std::is_same_v
+#include <utility>      // std::pair
+#include <vector>       // std::vector
+
+#include "unialgo/math/helpers.hpp"
 
 namespace unialgo {
 namespace math {
@@ -24,24 +26,44 @@ using layout_right = row_major;
 #endif
 
 /**
- * @brief Class rapresenting a sparse matrix
+ * @brief Class representing a sparse matrix in compressed storage
+ *
+ * Uses Compressed Row Storage (CRS) for layout_right (row_major)
+ * and Compressed Column Storage (CCS) for layout_left (column_major),
+ * following the same convention as Eigen.
  *
  * @tparam LayoutType layout of matrix
  */
 template <class LayoutType = layout_right>
 class SparseMatrix {
+  static constexpr bool IsRowMajor = std::is_same_v<LayoutType, layout_right>;
+
  public:
-  SparseMatrix(std::size_t r, std::size_t c) : rows_(r), cols_(c), matrix_(){};
+  SparseMatrix(std::size_t r, std::size_t c)
+      : rows_(r),
+        cols_(c),
+        values_(),
+        innerIndices_(),
+        outerStarts_(outerSize_() + 1, 0) {}
 
   /**
    * @brief Construct a SparseMatrix from a 2d vector
    * @attention the vector has to have the same layout as the
    * matrix being constructed
    *
-   * @
    * @param m 2d vector
    */
-  SparseMatrix(std::vector<std::vector<double>> m);
+  SparseMatrix(std::vector<std::vector<double>> m) {
+    if constexpr (IsRowMajor) {
+      rows_ = m.size();
+      cols_ = m[0].size();
+    } else {
+      cols_ = m.size();
+      rows_ = m[0].size();
+    }
+    buildFromDense_(m.size(), m[0].size(),
+                    [&](std::size_t o, std::size_t in) { return m[o][in]; });
+  }
 
   /**
    * @brief Construct a SparseMatrix from a 1d vector
@@ -52,7 +74,13 @@ class SparseMatrix {
    * @param r number of rows in matrix
    * @param c number of columns in matrix
    */
-  SparseMatrix(std::vector<double> m, std::size_t r, std::size_t c);
+  SparseMatrix(std::vector<double> m, std::size_t r, std::size_t c)
+      : rows_(r), cols_(c) {
+    std::size_t inner = innerSize_();
+    buildFromDense_(outerSize_(), inner, [&](std::size_t o, std::size_t in) {
+      return m[o * inner + in];
+    });
+  }
 
   ~SparseMatrix() = default;
 
@@ -61,7 +89,7 @@ class SparseMatrix {
    *
    * @return std::pair<std::size_t, std::size_t> (rows, cols)
    */
-  std::pair<std::size_t, std::size_t> size() {
+  std::pair<std::size_t, std::size_t> size() const {
     return std::make_pair(rows_, cols_);
   }
 
@@ -70,14 +98,14 @@ class SparseMatrix {
    *
    * @return std::size_t number of rows
    */
-  std::size_t rows() { return rows_; }
+  std::size_t rows() const { return rows_; }
 
   /**
    * @brief Get columns inside matrix
    *
    * @return std::size_t number of columns
    */
-  std::size_t cols() { return cols_; }
+  std::size_t cols() const { return cols_; }
 
 #if __cplusplus >= 202300L
   /**
@@ -89,14 +117,6 @@ class SparseMatrix {
    */
   double operator[](std::size_t i, std::size_t j) const {
     return operator()(i, j);
-    // if (matrix_.find(i) != matrix_.end()) {
-    //   for (std::size_t k = 0; k < matrix_.at(i).first.size(); ++k) {
-    //     if (matrix_.at(i).first[k] == j) {
-    //       return matrix_.at(i).second[k];
-    //     }
-    //   }
-    // }
-    // return 0.0;
   }
 #endif
 
@@ -108,73 +128,111 @@ class SparseMatrix {
    * @return double mat_[i][j]
    */
   double operator()(std::size_t i, std::size_t j) const {
-    if (matrix_.find(i) != matrix_.end()) {
-      for (std::size_t k = 0; k < matrix_.at(i).first.size(); ++k) {
-        if (matrix_.at(i).first[k] == j) {
-          return matrix_.at(i).second[k];
-        }
-      }
+    auto [outer, inner] = toOuterInner_(i, j);
+    // scan the compressed slice for this outer index
+    std::size_t start = outerStarts_[outer];
+    std::size_t end = outerStarts_[outer + 1];
+    for (std::size_t k = start; k < end; ++k) {
+      if (innerIndices_[k] == inner) return values_[k];
+      if (innerIndices_[k] > inner) break;  // sorted, won't find it
     }
     return 0.0;
   }
 
   /**
-   * @brief Insert value in matrix
-   *
-   * if the matrix keeps the rows sorted insertion is O(cols)
+   * @brief Insert or update value in matrix
    *
    * @param i row number
    * @param j col number
    * @param val value to insert
    */
   void operator()(std::size_t i, std::size_t j, double val) {
-    if (matrix_.find(i) != matrix_.end()) {
-      for (std::size_t k = 0; k < matrix_.at(i).first.size(); ++k) {
-        if (matrix_.at(i).first[k] == j) {
-          matrix_.at(i).second[k] = val;
-        }
-        // this keeps the matrix rows indexes sorted (not sure if needed)
-        else if (matrix_.at(i).first[k] > j) {
-          matrix_.at(i).first.insert(matrix_.at(i).first.begin() + k, j);
-          matrix_.at(i).second.insert(matrix_.at(i).second.begin() + k, val);
-          break;
-        }
+    auto [outer, inner] = toOuterInner_(i, j);
+    std::size_t start = outerStarts_[outer];
+    std::size_t end = outerStarts_[outer + 1];
+    for (std::size_t k = start; k < end; ++k) {
+      if (innerIndices_[k] == inner) {
+        // already exists, just update
+        values_[k] = val;
+        return;
       }
+      if (innerIndices_[k] > inner) {
+        // insert here to keep inner indices sorted
+        innerIndices_.insert(innerIndices_.begin() + k, inner);
+        values_.insert(values_.begin() + k, val);
+        // shift all following outer pointers
+        for (std::size_t o = outer + 1; o <= outerSize_(); ++o) {
+          outerStarts_[o]++;
+        }
+        return;
+      }
+    }
+    // append at the end of this outer slice
+    innerIndices_.insert(innerIndices_.begin() + end, inner);
+    values_.insert(values_.begin() + end, val);
+    for (std::size_t o = outer + 1; o <= outerSize_(); ++o) {
+      outerStarts_[o]++;
     }
   }
 
   /**
    * @brief Returns a transposed version of the matrix
-   * @attention the matrix is not sorted
-   * @return SparseMatrix
+   *
+   * @return SparseMatrix transposed
    */
-  SparseMatrix transpose() {
+  SparseMatrix transpose() const {
     SparseMatrix transposed(cols_, rows_);
-    for (auto it = matrix_.begin(); it != matrix_.end(); ++it) {
-      for (std::size_t c = 0; c < it->second.first.size(); ++c) {
-        if (transposed.matrix_.find(it->second.first[c]) !=
-            transposed.matrix_.end()) {
-          transposed.matrix_.at(it->second.first[c])
-              .first.emplace_back(it->first);
-          transposed.matrix_.at(it->second.first[c])
-              .second.emplace_back(it->second.second[c]);
-        } else {
-          transposed.matrix_[it->second.first[c]] =
-              std::make_pair(std::vector<std::size_t>{it->first},
-                             std::vector<double>{it->second.second[c]});
-        }
+    std::size_t nnz = values_.size();
+    if (nnz == 0) return transposed;
+
+    // Count entries per new outer index
+    // In the transposed matrix, original inner indices become new outer indices
+    std::vector<std::size_t> count(transposed.outerSize_() + 1, 0);
+    for (std::size_t k = 0; k < nnz; ++k) {
+      count[innerIndices_[k] + 1]++;
+    }
+    for (std::size_t o = 0; o < transposed.outerSize_(); ++o) {
+      count[o + 1] += count[o];
+    }
+
+    transposed.outerStarts_ = count;
+    transposed.values_.resize(nnz);
+    transposed.innerIndices_.resize(nnz);
+
+    // Fill: iterate original outer slices so new inner indices are inserted
+    // in ascending order
+    std::vector<std::size_t> pos(count.begin(), count.end() - 1);
+    for (std::size_t o = 0; o < outerSize_(); ++o) {
+      for (std::size_t k = outerStarts_[o]; k < outerStarts_[o + 1]; ++k) {
+        std::size_t newOuter = innerIndices_[k];
+        std::size_t idx = pos[newOuter]++;
+        transposed.innerIndices_[idx] = o;
+        transposed.values_[idx] = values_[k];
       }
     }
+
     return transposed;
   }
 
   friend SparseMatrix operator*(const SparseMatrix& mat,
-                                std::vector<double> vec) {}
+                                std::vector<double> vec) {
+    return mat;
+  }
   friend SparseMatrix operator*(std::vector<double> vec,
-                                const SparseMatrix& mat) {}
+                                const SparseMatrix& mat) {
+    return mat;
+  }
 
-  friend SparseMatrix operator*(double alpha, const SparseMatrix& mat) {}
-  friend SparseMatrix operator*(const SparseMatrix& mat, double alpha) {}
+  friend SparseMatrix operator*(double alpha, const SparseMatrix& mat) {
+    SparseMatrix result(mat);
+    for (std::size_t k = 0; k < result.values_.size(); ++k) {
+      result.values_[k] *= alpha;
+    }
+    return result;
+  }
+  friend SparseMatrix operator*(const SparseMatrix& mat, double alpha) {
+    return alpha * mat;
+  }
 
   /**
    * @brief Mat + vec
@@ -182,39 +240,91 @@ class SparseMatrix {
    *
    * @param mat Sparse matrix
    * @param vec vector
-   * @return SparseMatrix transposed
+   * @return SparseMatrix
    */
   friend SparseMatrix operator+(const SparseMatrix& mat,
-                                std::vector<double> vec) {}
+                                std::vector<double> vec) {
+    return mat;
+  }
 
-  void debug() {
-    auto printVec = [](std::vector<double> vec) {
-      for (int i = 0; i < vec.size(); ++i) {
-        std::cout << vec[i] << " ";
-      }
-      std::cout << std::endl;
-    };
-
-    auto printPos = [](std::vector<std::size_t> vec) {
-      for (int i = 0; i < vec.size(); ++i) {
-        std::cout << vec[i] << " ";
-      }
-      std::cout << std::endl;
-    };
-
-    for (int i = 0; i < rows_; ++i) {
-      std::cout << "row: " << i << ":" << std::endl;
-      printPos(matrix_.at(i).first);
-      printVec(matrix_.at(i).second);
-    }
+  void debug() const {
+    std::cout << "outerStarts: ";
+    for (auto v : outerStarts_) std::cout << v << " ";
+    std::cout << std::endl;
+    std::cout << "innerIndices: ";
+    for (auto v : innerIndices_) std::cout << v << " ";
+    std::cout << std::endl;
+    std::cout << "values: ";
+    for (auto v : values_) std::cout << v << " ";
+    std::cout << std::endl;
   }
 
  private:
-  std::unordered_map<std::size_t,
-                     std::pair<std::vector<std::size_t>, std::vector<double>>>
-      matrix_;
   std::size_t rows_;
   std::size_t cols_;
+  std::vector<double> values_;
+  std::vector<std::size_t> innerIndices_;
+  std::vector<std::size_t> outerStarts_;
+
+  std::size_t outerSize_() const { return IsRowMajor ? rows_ : cols_; }
+  std::size_t innerSize_() const { return IsRowMajor ? cols_ : rows_; }
+
+  std::pair<std::size_t, std::size_t> toOuterInner_(std::size_t i,
+                                                    std::size_t j) const {
+    if constexpr (IsRowMajor) {
+      return {i, j};
+    } else {
+      return {j, i};
+    }
+  }
+
+  /**
+   * @brief Build compressed storage from a dense source
+   *
+   * Populates values_, innerIndices_ and outerStarts_ in two passes:
+   *  1. Counts non-zeros per outer slice and builds outerStarts_
+   *     via prefix sum.
+   *  2. Fills values_ and innerIndices_ using a per-slice write
+   *     position that advances as entries are inserted.
+   *
+   * @tparam Accessor callable (std::size_t outer, std::size_t inner) -> double
+   * @param outerDim number of outer slices (rows for CRS, cols for CCS)
+   * @param innerDim number of inner indices per slice
+   * @param access returns the dense value at (outer, inner)
+   */
+  template <typename Accessor>
+  void buildFromDense_(std::size_t outerDim, std::size_t innerDim,
+                       Accessor access) {
+    // count non-zeros per outer slice, store shifted by one in outerStarts_
+    outerStarts_.resize(outerDim + 1, 0);
+    for (std::size_t o = 0; o < outerDim; ++o) {
+      for (std::size_t in = 0; in < innerDim; ++in) {
+        if (!dequal(access(o, in), 0.0)) {
+          outerStarts_[o + 1]++;
+        }
+      }
+    }
+    // turn counts into cumulative offsets
+    for (std::size_t o = 0; o < outerDim; ++o) {
+      outerStarts_[o + 1] += outerStarts_[o];
+    }
+
+    std::size_t nnz = outerStarts_[outerDim];
+    values_.resize(nnz);
+    innerIndices_.resize(nnz);
+    // pos[o] tracks the next write position for each outer slice
+    std::vector<std::size_t> pos(outerStarts_.begin(), outerStarts_.end() - 1);
+    for (std::size_t o = 0; o < outerDim; ++o) {
+      for (std::size_t in = 0; in < innerDim; ++in) {
+        double val = access(o, in);
+        if (!dequal(val, 0.0)) {
+          std::size_t idx = pos[o]++;
+          innerIndices_[idx] = in;
+          values_[idx] = val;
+        }
+      }
+    }
+  }
 };
 
 }  // namespace math

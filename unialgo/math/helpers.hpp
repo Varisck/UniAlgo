@@ -9,7 +9,7 @@ namespace unialgo {
 namespace math {
 
 // check if two doubles are (almost) equal, distance less then epliston % of max
-bool dequal(double a, double b, double epsilon = DBL_EPSILON) {
+inline bool dequal(double a, double b, double epsilon = DBL_EPSILON) {
   double res = std::abs(a - b);
   // find max without abs (?)
   double max = std::max(std::abs(a), std::abs(b));
