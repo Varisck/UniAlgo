@@ -54,9 +54,9 @@ WaveletMatrix::WaveletMatrix(const utils::WordVector& string)
 }
 
 void WaveletMatrix::initHelper() {
-  // moved-from objects have empty storage but stale num_bits_ — check raw data
+  // Skip RankHelper construction for moved-from or empty bitvectors
   // (RankHelper's constructor uses log(size) which is undefined for size=0)
-  if (matrix_.data() == nullptr) return;
+  if (matrix_.size() == 0) return;
   helper_ = utils::RankHelper(
       std::shared_ptr<utils::Bitvector>(&matrix_, [](utils::Bitvector*) {}));
 }

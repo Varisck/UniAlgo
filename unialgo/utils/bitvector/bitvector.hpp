@@ -44,9 +44,21 @@ class Bitvector {
   ~Bitvector() = default;
 
   Bitvector(const Bitvector&) = default;
-  Bitvector(Bitvector&&) = default;
   Bitvector& operator=(const Bitvector&) = default;
-  Bitvector& operator=(Bitvector&&) = default;
+
+  Bitvector(Bitvector&& other) noexcept
+      : bits_(std::move(other.bits_)), num_bits_(other.num_bits_) {
+    other.num_bits_ = 0;
+  }
+
+  Bitvector& operator=(Bitvector&& other) noexcept {
+    if (this != &other) {
+      bits_ = std::move(other.bits_);
+      num_bits_ = other.num_bits_;
+      other.num_bits_ = 0;
+    }
+    return *this;
+  }
 
   /**
    * @brief Accessing bit in Bitvector
