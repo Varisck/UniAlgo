@@ -214,13 +214,56 @@ class SparseMatrix {
     return transposed;
   }
 
-  friend SparseMatrix operator*(const SparseMatrix& mat,
-                                std::vector<double> vec) {
-    return mat;
+  /**
+   * @brief Mat * vec
+   * @attention the vector has to have size == mat.cols_
+   *
+   * Iterates only over stored non-zeros. For each entry,
+   * maps (outer, inner) back to (row, col) based on layout
+   * and accumulates values_[k] * vec[col] into result[row].
+   *
+   * @param mat Sparse matrix (m x n)
+   * @param vec vector of size n
+   * @return std::vector<double> result of size m
+   */
+  friend std::vector<double> operator*(const SparseMatrix& mat,
+                                       const std::vector<double>& vec) {
+    std::vector<double> result(mat.rows_, 0.0);
+    for (std::size_t o = 0; o < mat.outerSize_(); ++o) {
+      for (std::size_t k = mat.outerStarts_[o]; k < mat.outerStarts_[o + 1];
+           ++k) {
+        std::size_t in = mat.innerIndices_[k];
+        std::size_t row = IsRowMajor ? o : in;
+        std::size_t col = IsRowMajor ? in : o;
+        result[row] += mat.values_[k] * vec[col];
+      }
+    }
+    return result;
   }
-  friend SparseMatrix operator*(std::vector<double> vec,
-                                const SparseMatrix& mat) {
-    return mat;
+  /**
+   * @brief vec * Mat, equivalent to mat^T * vec
+   * @attention the vector has to have size == mat.rows_
+   *
+   * Same loop as mat * vec but accumulates
+   * vec[row] * values_[k] into result[col].
+   *
+   * @param vec vector of size m
+   * @param mat Sparse matrix (m x n)
+   * @return std::vector<double> result of size n
+   */
+  friend std::vector<double> operator*(const std::vector<double>& vec,
+                                       const SparseMatrix& mat) {
+    std::vector<double> result(mat.cols_, 0.0);
+    for (std::size_t o = 0; o < mat.outerSize_(); ++o) {
+      for (std::size_t k = mat.outerStarts_[o]; k < mat.outerStarts_[o + 1];
+           ++k) {
+        std::size_t in = mat.innerIndices_[k];
+        std::size_t row = IsRowMajor ? o : in;
+        std::size_t col = IsRowMajor ? in : o;
+        result[col] += vec[row] * mat.values_[k];
+      }
+    }
+    return result;
   }
 
   friend SparseMatrix operator*(double alpha, const SparseMatrix& mat) {
@@ -235,6 +278,9 @@ class SparseMatrix {
   }
 
   /**
+   *
+   * Problem this should return a dense matrix
+   *
    * @brief Mat + vec
    * @attention the vector has to have size == mat.rows_
    *
@@ -242,10 +288,19 @@ class SparseMatrix {
    * @param vec vector
    * @return SparseMatrix
    */
-  friend SparseMatrix operator+(const SparseMatrix& mat,
-                                std::vector<double> vec) {
-    return mat;
-  }
+  // friend SparseMatrix operator+(const SparseMatrix& mat,
+  //                               std::vector<double> vec) {
+  //   SparseMatrix result(mat);
+  //   for (std::size_t o = 0; o < mat.outerSize_(); ++o) {
+  //     for (std::size_t k = mat.outerStarts_[o]; k < mat.outerStarts_[o + 1];
+  //          ++k) {
+  //       std::size_t in = mat.innerIndices_[k];
+  //       std::size_t row = IsRowMajor ? o : in;
+  //       result.values_[k] += vec[row];
+  //     }
+  //   }
+  //   return result;
+  // }
 
   void debug() const {
     std::cout << "outerStarts: ";
