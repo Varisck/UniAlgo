@@ -1,6 +1,7 @@
 #ifndef UNIALGO_MATH_SPARSEMATRIX_
 #define UNIALGO_MATH_SPARSEMATRIX_
 
+#include <algorithm>    // std::sort
 #include <iostream>     // std::cout DEBUG
 #include <type_traits>  // std::is_same_v
 #include <utility>      // std::pair
