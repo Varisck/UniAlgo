@@ -308,6 +308,81 @@ class SparseMatrix {
   }
 
   /**
+   * @brief Mat * Mat
+   *
+   * For CRS (row major): iterates rows of A, for each non-zero (k, val_a)
+   * in that row, adds val_a * row k of B into a workspace. This builds
+   * the result row-by-row in CRS order.
+   *
+   * For CCS (col major): iterates columns of B, for each non-zero (k, val_b)
+   * in that column, adds val_b * column k of A into a workspace. This builds
+   * the result column-by-column in CCS order.
+   *
+   * Both paths only use fast O(nnz_in_slice) outer access.
+   *
+   * @param A Sparse matrix (m x n)
+   * @param B Sparse matrix (n x p)
+   * @return SparseMatrix (m x p)
+   */
+  friend SparseMatrix operator*(const SparseMatrix& A, const SparseMatrix& B) {
+    SparseMatrix C(A.rows_, B.cols_);
+
+    // workspace size is the inner dimension of the result
+    std::vector<double> work(C.innerSize_(), 0.0);
+    std::vector<std::size_t> touched;
+
+    for (std::size_t o = 0; o < C.outerSize_(); ++o) {
+      if constexpr (IsRowMajor) {
+        // row o of C = sum of A[o,k] * row_k(B)
+        std::size_t aStart = A.outerStarts_[o];
+        std::size_t aEnd = A.outerStarts_[o + 1];
+        for (std::size_t ak = aStart; ak < aEnd; ++ak) {
+          std::size_t k = A.innerIndices_[ak];
+          double val_a = A.values_[ak];
+          // add val_a * row k of B into workspace
+          std::size_t bStart = B.outerStarts_[k];
+          std::size_t bEnd = B.outerStarts_[k + 1];
+          for (std::size_t bk = bStart; bk < bEnd; ++bk) {
+            std::size_t j = B.innerIndices_[bk];
+            if (dequal(work[j], 0.0)) touched.push_back(j);
+            work[j] += val_a * B.values_[bk];
+          }
+        }
+      } else {
+        // col o of C = sum of B[k,o] * col_k(A)
+        std::size_t bStart = B.outerStarts_[o];
+        std::size_t bEnd = B.outerStarts_[o + 1];
+        for (std::size_t bk = bStart; bk < bEnd; ++bk) {
+          std::size_t k = B.innerIndices_[bk];
+          double val_b = B.values_[bk];
+          // add val_b * col k of A into workspace
+          std::size_t aStart = A.outerStarts_[k];
+          std::size_t aEnd = A.outerStarts_[k + 1];
+          for (std::size_t ak = aStart; ak < aEnd; ++ak) {
+            std::size_t i = A.innerIndices_[ak];
+            if (dequal(work[i], 0.0)) touched.push_back(i);
+            work[i] += val_b * A.values_[ak];
+          }
+        }
+      }
+
+      // compress workspace into outer slice o of C
+      std::sort(touched.begin(), touched.end());
+      for (std::size_t idx : touched) {
+        if (!dequal(work[idx], 0.0)) {
+          C.innerIndices_.push_back(idx);
+          C.values_.push_back(work[idx]);
+        }
+        work[idx] = 0.0;
+      }
+      C.outerStarts_[o + 1] = C.values_.size();
+      touched.clear();
+    }
+
+    return C;
+  }
+
+  /**
    * @brief Get a row of the matrix as a SparseVector
    *
    * @param i row index

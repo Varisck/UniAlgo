@@ -604,4 +604,69 @@ TEST(TestSparseMatrix, MatSparseVecMultiplicationColMajor) {
   EXPECT_EQ(result[2], 190.0);
 }
 
+// ============ Testing SparseMatrix * SparseMatrix ============
+
+// testing mat * mat (row major)
+TEST(TestSparseMatrix, MatMatMultiplication) {
+  // A:             B:
+  // 1 0 2          1 0
+  // 0 3 0          0 4
+  // 4 0 5          3 0
+  std::vector<std::vector<double>> a({{1, 0, 2}, {0, 3, 0}, {4, 0, 5}});
+  std::vector<std::vector<double>> b({{1, 0}, {0, 4}, {3, 0}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_right> A(a);
+  unialgo::math::SparseMatrix<unialgo::math::layout_right> B(b);
+
+  auto C = A * B;
+  // C = A * B:
+  // row 0: [1*1+0*0+2*3, 1*0+0*4+2*0] = [7, 0]
+  // row 1: [0*1+3*0+0*3, 0*0+3*4+0*0] = [0, 12]
+  // row 2: [4*1+0*0+5*3, 4*0+0*4+5*0] = [19, 0]
+  EXPECT_EQ(C.rows(), 3);
+  EXPECT_EQ(C.cols(), 2);
+  EXPECT_EQ(C(0, 0), 7.0);
+  EXPECT_EQ(C(0, 1), 0.0);
+  EXPECT_EQ(C(1, 0), 0.0);
+  EXPECT_EQ(C(1, 1), 12.0);
+  EXPECT_EQ(C(2, 0), 19.0);
+  EXPECT_EQ(C(2, 1), 0.0);
+}
+
+// testing mat * mat (col major)
+TEST(TestSparseMatrix, MatMatMultiplicationColMajor) {
+  // same logical matrices, CCS layout
+  // A: v[col][row] = {{1,0,4}, {0,3,0}, {2,0,5}}
+  // B: v[col][row] = {{1,0,3}, {0,4,0}}
+  std::vector<std::vector<double>> a({{1, 0, 4}, {0, 3, 0}, {2, 0, 5}});
+  std::vector<std::vector<double>> b({{1, 0, 3}, {0, 4, 0}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_left> A(a);
+  unialgo::math::SparseMatrix<unialgo::math::layout_left> B(b);
+
+  auto C = A * B;
+  EXPECT_EQ(C.rows(), 3);
+  EXPECT_EQ(C.cols(), 2);
+  EXPECT_EQ(C(0, 0), 7.0);
+  EXPECT_EQ(C(0, 1), 0.0);
+  EXPECT_EQ(C(1, 0), 0.0);
+  EXPECT_EQ(C(1, 1), 12.0);
+  EXPECT_EQ(C(2, 0), 19.0);
+  EXPECT_EQ(C(2, 1), 0.0);
+}
+
+// testing square mat * mat
+TEST(TestSparseMatrix, MatMatMultiplicationSquare) {
+  // 1 2
+  // 3 4
+  std::vector<std::vector<double>> v({{1, 2}, {3, 4}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_right> A(v);
+
+  auto C = A * A;
+  // [1*1+2*3, 1*2+2*4] = [7, 10]
+  // [3*1+4*3, 3*2+4*4] = [15, 22]
+  EXPECT_EQ(C(0, 0), 7.0);
+  EXPECT_EQ(C(0, 1), 10.0);
+  EXPECT_EQ(C(1, 0), 15.0);
+  EXPECT_EQ(C(1, 1), 22.0);
+}
+
 }  // namespace
