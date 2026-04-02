@@ -151,7 +151,7 @@ std::vector<std::size_t> Byg(T& t, T& p);
 
 // =============== Implementation ===============
 
-template <typename T = std::string>
+template <typename T>
 TransitionFunction<T> MakeTransitionFunction(const T& p) {
   TransitionFunction<T> transition;
   size_t unique_char = 0;  // unique characters in pattern
@@ -177,7 +177,7 @@ TransitionFunction<T> MakeTransitionFunction(const T& p) {
   return transition;
 }
 
-template <typename T = std::string>
+template <typename T>
 std::vector<std::size_t> Fsa(const T& t, const T& p,
                              const TransitionFunction<T>& tf) {
   // check size of words in case template resolve to WordVector
@@ -202,13 +202,13 @@ std::vector<std::size_t> Fsa(const T& t, const T& p,
   return occurrences;
 }
 
-template <typename T = std::string>
+template <typename T>
 std::vector<std::size_t> Fsa(const T& t, const T& p) {
   TransitionFunction<T> tf = MakeTransitionFunction(p);
   return Fsa<T>(t, p, tf);
 }
 
-template <typename T = std::string>
+template <typename T>
 std::vector<std::size_t> Byg(T& t, T& p) {
   // construct Byg tamble (sigma -> word with occurrences of sigma in p)
 

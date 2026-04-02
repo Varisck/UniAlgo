@@ -360,8 +360,7 @@ class BitvectorReference {
 };
 
 // =============== Implementation  ===============
-template <typename T, typename = typename std::enable_if<
-                          std::is_arithmetic<T>::value, T>::type>
+template <typename T, typename>
 Bitvector& Bitvector::operator>=(const T value) {
   Bitvector::Type lsbs = 0;
   Bitvector::Type msbs = 0;
