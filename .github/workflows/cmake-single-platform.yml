@@ -38,7 +38,7 @@ jobs:
         run: ctest -C ${{env.BUILD_TYPE}} --verbose --rerun-failed --output-on-failure -O ctest_output.log
 
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3.2.1-node20
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ctest-results
