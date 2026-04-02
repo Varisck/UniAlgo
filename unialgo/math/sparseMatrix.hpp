@@ -7,6 +7,7 @@
 #include <vector>       // std::vector
 
 #include "unialgo/math/helpers.hpp"
+#include "unialgo/math/sparseVector.hpp"
 
 namespace unialgo {
 namespace math {
@@ -106,6 +107,35 @@ class SparseMatrix {
    * @return std::size_t number of columns
    */
   std::size_t cols() const { return cols_; }
+
+  /**
+   * @brief operator() accessing an outer slice as a SparseVector
+   *
+   * Returns a row for row_major (CRS) or a column for column_major (CCS).
+   * Always the fast O(nnz_in_slice) path.
+   *
+   * @param i outer index (row for CRS, column for CCS)
+   * @return SparseVector
+   */
+  SparseVector operator()(std::size_t i) const {
+    if constexpr (IsRowMajor) {
+      return row(i);
+    } else {
+      return col(i);
+    }
+  }
+
+  /**
+   * @brief operator[] accessing an outer slice as a SparseVector
+   *
+   * Same as operator()(i).
+   *
+   * @param i outer index (row for CRS, column for CCS)
+   * @return SparseVector
+   */
+  SparseVector operator[](std::size_t i) const {
+    return operator()(i);
+  }
 
 #if __cplusplus >= 202300L
   /**
@@ -278,6 +308,51 @@ class SparseMatrix {
   }
 
   /**
+   * @brief Get a row of the matrix as a SparseVector
+   *
+   * @param i row index
+   * @return SparseVector of size cols_
+   */
+  SparseVector row(std::size_t i) const { return slice_(i, IsRowMajor); }
+
+  /**
+   * @brief Get a column of the matrix as a SparseVector
+   *
+   * @param j column index
+   * @return SparseVector of size rows_
+   */
+  SparseVector col(std::size_t j) const { return slice_(j, !IsRowMajor); }
+
+  /**
+   * @brief Mat * SparseVector
+   * @attention the vector has to have size == mat.cols_
+   *
+   * Only iterates over non-zeros in both the matrix and the vector.
+   *
+   * @param mat Sparse matrix (m x n)
+   * @param vec SparseVector of size n
+   * @return std::vector<double> result of size m
+   */
+  friend std::vector<double> operator*(const SparseMatrix& mat,
+                                       const SparseVector& vec) {
+    std::vector<double> result(mat.rows_, 0.0);
+    for (std::size_t o = 0; o < mat.outerSize_(); ++o) {
+      for (std::size_t k = mat.outerStarts_[o]; k < mat.outerStarts_[o + 1];
+           ++k) {
+        std::size_t in = mat.innerIndices_[k];
+        std::size_t row = IsRowMajor ? o : in;
+        std::size_t col = IsRowMajor ? in : o;
+        // only multiply if the sparse vector has this col
+        double v = vec(col);
+        if (!dequal(v, 0.0)) {
+          result[row] += mat.values_[k] * v;
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
    *
    * Problem this should return a dense matrix
    *
@@ -323,6 +398,35 @@ class SparseMatrix {
 
   std::size_t outerSize_() const { return IsRowMajor ? rows_ : cols_; }
   std::size_t innerSize_() const { return IsRowMajor ? cols_ : rows_; }
+
+  // extracts a slice from the compressed storage
+  // if isOuter, idx is an outer index → O(nnz_in_slice), direct copy
+  // if !isOuter, idx is an inner index → O(nnz), scans all outer slices
+  SparseVector slice_(std::size_t idx, bool isOuter) const {
+    if (isOuter) {
+      std::size_t start = outerStarts_[idx];
+      std::size_t end = outerStarts_[idx + 1];
+      return SparseVector(
+          std::vector<std::size_t>(innerIndices_.begin() + start,
+                                   innerIndices_.begin() + end),
+          std::vector<double>(values_.begin() + start,
+                              values_.begin() + end),
+          innerSize_());
+    }
+    // scan all outer slices for entries with inner index == idx
+    std::vector<std::size_t> indices;
+    std::vector<double> values;
+    for (std::size_t o = 0; o < outerSize_(); ++o) {
+      for (std::size_t k = outerStarts_[o]; k < outerStarts_[o + 1]; ++k) {
+        if (innerIndices_[k] == idx) {
+          indices.push_back(o);
+          values.push_back(values_[k]);
+        }
+        if (innerIndices_[k] > idx) break;  // sorted
+      }
+    }
+    return SparseVector(std::move(indices), std::move(values), outerSize_());
+  }
 
   std::pair<std::size_t, std::size_t> toOuterInner_(std::size_t i,
                                                     std::size_t j) const {

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "unialgo/math/sparseMatrix.hpp"
+#include "unialgo/math/sparseVector.hpp"
 
 namespace {
 
@@ -369,6 +370,238 @@ TEST(TestSparseMatrix, InsertColMajor) {
   EXPECT_EQ(mat(1, 0), 2.0);
   EXPECT_EQ(mat(0, 1), 0.0);
   EXPECT_EQ(mat(0, 2), 5.0);
+}
+
+// testing operator()(i) and operator[](i) for outer slice access
+TEST(TestSparseMatrix, SingleArgAccessRowMajor) {
+  // 1 0 3
+  // 0 5 0
+  std::vector<std::vector<double>> v({{1, 0, 3}, {0, 5, 0}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_right> mat(v);
+
+  // row major: operator()(i) returns row i
+  auto r0 = mat(0);
+  EXPECT_EQ(r0.size(), 3);
+  EXPECT_EQ(r0(0), 1.0);
+  EXPECT_EQ(r0(1), 0.0);
+  EXPECT_EQ(r0(2), 3.0);
+
+  auto r1 = mat[1];
+  EXPECT_EQ(r1(1), 5.0);
+  EXPECT_EQ(r1(0), 0.0);
+}
+
+TEST(TestSparseMatrix, SingleArgAccessColMajor) {
+  // layout_left: v[col][row]
+  // v = {{1, 0}, {0, 5}, {3, 0}}
+  // matrix:
+  // 1 0 3
+  // 0 5 0
+  std::vector<std::vector<double>> v({{1, 0}, {0, 5}, {3, 0}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_left> mat(v);
+
+  // col major: operator()(i) returns col i
+  auto c0 = mat(0);
+  EXPECT_EQ(c0.size(), 2);
+  EXPECT_EQ(c0(0), 1.0);
+  EXPECT_EQ(c0(1), 0.0);
+
+  auto c2 = mat[2];
+  EXPECT_EQ(c2(0), 3.0);
+  EXPECT_EQ(c2(1), 0.0);
+}
+
+// ============ Testing SparseVector ============
+
+// testing constructor and access
+TEST(TestSparseVector, ConstructorAndAccess) {
+  unialgo::math::SparseVector vec(5);
+  EXPECT_EQ(vec.size(), 5);
+  EXPECT_EQ(vec.nnz(), 0);
+  EXPECT_EQ(vec(0), 0.0);
+  EXPECT_EQ(vec(4), 0.0);
+}
+
+// testing dense constructor
+TEST(TestSparseVector, DenseConstructor) {
+  std::vector<double> v({0, 3, 0, 0, 7, 0});
+  unialgo::math::SparseVector vec(v);
+  EXPECT_EQ(vec.size(), 6);
+  EXPECT_EQ(vec.nnz(), 2);
+  EXPECT_EQ(vec(0), 0.0);
+  EXPECT_EQ(vec(1), 3.0);
+  EXPECT_EQ(vec(4), 7.0);
+}
+
+// testing insertion
+TEST(TestSparseVector, Insert) {
+  unialgo::math::SparseVector vec(4);
+  vec(3, 9.0);
+  vec(0, 1.0);
+  vec(2, 5.0);
+  EXPECT_EQ(vec(0), 1.0);
+  EXPECT_EQ(vec(1), 0.0);
+  EXPECT_EQ(vec(2), 5.0);
+  EXPECT_EQ(vec(3), 9.0);
+  EXPECT_EQ(vec.nnz(), 3);
+
+  // update existing
+  vec(2, 99.0);
+  EXPECT_EQ(vec(2), 99.0);
+  EXPECT_EQ(vec.nnz(), 3);
+}
+
+// testing dot product between sparse vectors
+TEST(TestSparseVector, DotSparse) {
+  std::vector<double> a({1, 0, 3, 0, 5});
+  std::vector<double> b({0, 2, 4, 0, 6});
+  unialgo::math::SparseVector sa(a);
+  unialgo::math::SparseVector sb(b);
+  // 1*0 + 0*2 + 3*4 + 0*0 + 5*6 = 42
+  EXPECT_EQ(dot(sa, sb), 42.0);
+}
+
+// testing dot product with dense vector
+TEST(TestSparseVector, DotDense) {
+  std::vector<double> a({0, 3, 0, 0, 7});
+  unialgo::math::SparseVector sa(a);
+  std::vector<double> b({1, 2, 3, 4, 5});
+  // 3*2 + 7*5 = 41
+  EXPECT_EQ(dot(sa, b), 41.0);
+  EXPECT_EQ(dot(b, sa), 41.0);
+}
+
+// testing scalar multiplication
+TEST(TestSparseVector, ScalarMul) {
+  std::vector<double> v({0, 3, 0, 7});
+  unialgo::math::SparseVector vec(v);
+  auto scaled = 2.0 * vec;
+  EXPECT_EQ(scaled(1), 6.0);
+  EXPECT_EQ(scaled(3), 14.0);
+  EXPECT_EQ(scaled(0), 0.0);
+  // original unchanged
+  EXPECT_EQ(vec(1), 3.0);
+}
+
+// testing toDense
+TEST(TestSparseVector, ToDense) {
+  std::vector<double> v({0, 3, 0, 7});
+  unialgo::math::SparseVector vec(v);
+  auto dense = vec.toDense();
+  EXPECT_EQ(dense.size(), 4);
+  EXPECT_EQ(dense[0], 0.0);
+  EXPECT_EQ(dense[1], 3.0);
+  EXPECT_EQ(dense[2], 0.0);
+  EXPECT_EQ(dense[3], 7.0);
+}
+
+// ============ Testing SparseMatrix row/col ============
+
+// testing row extraction (row major)
+TEST(TestSparseMatrix, RowExtraction) {
+  // 1 0 3
+  // 0 5 0
+  // 0 0 9
+  std::vector<std::vector<double>> v({{1, 0, 3}, {0, 5, 0}, {0, 0, 9}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_right> mat(v);
+
+  auto r0 = mat.row(0);
+  EXPECT_EQ(r0.size(), 3);
+  EXPECT_EQ(r0(0), 1.0);
+  EXPECT_EQ(r0(1), 0.0);
+  EXPECT_EQ(r0(2), 3.0);
+  EXPECT_EQ(r0.nnz(), 2);
+
+  auto r1 = mat.row(1);
+  EXPECT_EQ(r1(0), 0.0);
+  EXPECT_EQ(r1(1), 5.0);
+  EXPECT_EQ(r1(2), 0.0);
+  EXPECT_EQ(r1.nnz(), 1);
+}
+
+// testing col extraction (row major)
+TEST(TestSparseMatrix, ColExtraction) {
+  // 1 0 3
+  // 0 5 0
+  // 7 0 9
+  std::vector<std::vector<double>> v({{1, 0, 3}, {0, 5, 0}, {7, 0, 9}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_right> mat(v);
+
+  auto c0 = mat.col(0);
+  EXPECT_EQ(c0.size(), 3);
+  EXPECT_EQ(c0(0), 1.0);
+  EXPECT_EQ(c0(1), 0.0);
+  EXPECT_EQ(c0(2), 7.0);
+  EXPECT_EQ(c0.nnz(), 2);
+
+  auto c1 = mat.col(1);
+  EXPECT_EQ(c1(0), 0.0);
+  EXPECT_EQ(c1(1), 5.0);
+  EXPECT_EQ(c1(2), 0.0);
+  EXPECT_EQ(c1.nnz(), 1);
+}
+
+// testing row/col extraction (col major)
+TEST(TestSparseMatrix, RowColExtractionColMajor) {
+  // layout_left: v[col][row]
+  // v = {{1, 0, 7}, {0, 5, 0}, {3, 0, 9}}
+  // matrix:
+  // 1 0 3
+  // 0 5 0
+  // 7 0 9
+  std::vector<std::vector<double>> v({{1, 0, 7}, {0, 5, 0}, {3, 0, 9}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_left> mat(v);
+
+  // col is fast for CCS
+  auto c0 = mat.col(0);
+  EXPECT_EQ(c0.size(), 3);
+  EXPECT_EQ(c0(0), 1.0);
+  EXPECT_EQ(c0(1), 0.0);
+  EXPECT_EQ(c0(2), 7.0);
+
+  // row is slow for CCS but should still work
+  auto r1 = mat.row(1);
+  EXPECT_EQ(r1.size(), 3);
+  EXPECT_EQ(r1(0), 0.0);
+  EXPECT_EQ(r1(1), 5.0);
+  EXPECT_EQ(r1(2), 0.0);
+}
+
+// ============ Testing SparseMatrix * SparseVector ============
+
+// testing mat * sparse vec
+TEST(TestSparseMatrix, MatSparseVecMultiplication) {
+  // 1 0 2
+  // 0 3 0
+  // 4 0 5
+  std::vector<std::vector<double>> v({{1, 0, 2}, {0, 3, 0}, {4, 0, 5}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_right> mat(v);
+  // sparse vec: [10, 0, 30]
+  unialgo::math::SparseVector vec(std::vector<double>({10, 0, 30}));
+
+  auto result = mat * vec;
+  // row 0: 1*10 + 2*30 = 70
+  // row 1: 3*0 = 0
+  // row 2: 4*10 + 5*30 = 190
+  EXPECT_EQ(result.size(), 3);
+  EXPECT_EQ(result[0], 70.0);
+  EXPECT_EQ(result[1], 0.0);
+  EXPECT_EQ(result[2], 190.0);
+}
+
+// testing mat * sparse vec (col major)
+TEST(TestSparseMatrix, MatSparseVecMultiplicationColMajor) {
+  // same logical matrix as above, CCS layout
+  // v[col][row]: {{1,0,4}, {0,3,0}, {2,0,5}}
+  std::vector<std::vector<double>> v({{1, 0, 4}, {0, 3, 0}, {2, 0, 5}});
+  unialgo::math::SparseMatrix<unialgo::math::layout_left> mat(v);
+  unialgo::math::SparseVector vec(std::vector<double>({10, 0, 30}));
+
+  auto result = mat * vec;
+  EXPECT_EQ(result.size(), 3);
+  EXPECT_EQ(result[0], 70.0);
+  EXPECT_EQ(result[1], 0.0);
+  EXPECT_EQ(result[2], 190.0);
 }
 
 }  // namespace

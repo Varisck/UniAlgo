@@ -1,6 +1,6 @@
 # create library unialgo::pattern
 add_library("math" "")
-target_sources("math" PUBLIC "math.hpp" "sparseMatrix.hpp" "sparseMatrix.cpp")
+target_sources("math" PUBLIC "math.hpp" "sparseVector.hpp" "sparseMatrix.hpp" "sparseMatrix.cpp")
 add_library(unialgo::math ALIAS "math")
 
 # tests: 
