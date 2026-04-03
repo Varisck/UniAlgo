@@ -6,11 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_TESTS ${CMAKE_BINARY_DIR}/tests)
 
-option(DEFINE_CI_MACRO_ENV "Compile cmake for ci/cd pipeline" OFF)
+# option(DEFINE_CI_MACRO_ENV "Compile cmake for ci/cd pipeline" OFF)
 
-if(DEFINE_CI_MACRO_ENV)
-  add_compile_definitions(UNIALGO_CI_ENVIRONMENT_)
-endif(DEFINE_CI_MACRO_ENV)
+# if(DEFINE_CI_MACRO_ENV)
+#   add_compile_definitions(UNIALGO_CI_ENVIRONMENT_)
+# endif(DEFINE_CI_MACRO_ENV)
 
 
 #add_compile_options(/I ${CMAKE_SOURCE_DIR}/)

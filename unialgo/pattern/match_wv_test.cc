@@ -64,9 +64,9 @@ TEST(FinateStateAutomataTestWV, checkWordSize) {
       unialgo::pattern::StringToBitVector(pattern1);
   EXPECT_EQ(wvText1.getWordSize(), 2);
   EXPECT_EQ(wvPattern1.getWordSize(), 1);
-  // this is for the ci/cd pipeline the process death is not handled correctly
-  // remove code when test is run on pipeline
-#ifndef UNIALGO_CI_ENVIRONMENT_
+  // assert is compiled out in Release builds (NDEBUG defined), so the death
+  // test can only trigger in Debug builds
+#ifndef NDEBUG
   ASSERT_DEATH(unialgo::pattern::Fsa<>(wvText1, wvPattern1),
                ".*word_size not matching for text and pattern.*");
 #endif
