@@ -49,6 +49,24 @@ class SparseMatrix {
         outerStarts_(outerSize_() + 1, 0) {}
 
   /**
+   * @brief Construct a SparseMatrix from pre-built compressed storage arrays
+   *
+   * @param r number of rows
+   * @param c number of columns
+   * @param vals non-zero values
+   * @param innerIdx inner indices (column indices for CRS, row indices for CCS)
+   * @param outerPtr outer start offsets (size = outerSize + 1)
+   */
+  SparseMatrix(std::size_t r, std::size_t c, std::vector<double> vals,
+               std::vector<std::size_t> innerIdx,
+               std::vector<std::size_t> outerPtr)
+      : rows_(r),
+        cols_(c),
+        values_(std::move(vals)),
+        innerIndices_(std::move(innerIdx)),
+        outerStarts_(std::move(outerPtr)) {}
+
+  /**
    * @brief Construct a SparseMatrix from a 2d vector
    * @attention the vector has to have the same layout as the
    * matrix being constructed
