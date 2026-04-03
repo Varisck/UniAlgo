@@ -19,6 +19,8 @@ Here is a list of the namspaces whit some of the main content in them. The top l
   - algorithms on graphs
 - math
   - Dot product using simd
+  - Sparse Matrix & Sparse Vec implementation
+  - Operations between Sparse Matrix and Sparse Vectors
 - Perceptron: class implementing basic perceptron (Rosenblatt)
 
 ## Actions
